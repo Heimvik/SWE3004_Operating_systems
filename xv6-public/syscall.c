@@ -136,7 +136,8 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    curproc->tf->eax = syscalls[num]();
+    curproc->tf->eax = syscalls[num](); 
+    /* Here is the actual entry point to the system call function (invoked and the return value will be put in current process eax register upon returning to the user mode again. That is when restoring the current process from the kernel stack. curpoc is a pointer to the kernel stack.*/    
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);

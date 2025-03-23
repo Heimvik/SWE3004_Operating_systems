@@ -27,7 +27,7 @@ main(void)
   consoleinit();   // console hardware
   uartinit();      // serial port
   pinit();         // process table
-  tvinit();        // trap vectors
+  tvinit();        // sets up the trap table at boot (which holds all 256 trap handlers)
   binit();         // buffer cache
   fileinit();      // file table
   ideinit();       // disk 

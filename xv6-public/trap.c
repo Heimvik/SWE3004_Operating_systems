@@ -14,6 +14,9 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+/*
+Maps out all the 256 entries in the idt with the corresponding address code in vecotors[]
+*/
 void
 tvinit(void)
 {
@@ -21,7 +24,10 @@ tvinit(void)
 
   for(i = 0; i < 256; i++)
     SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
-  SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
+  /*
+  Specifies that the gate to the kernel space is of type trap by passing 1 in the second arg (trap gates dont clear the IF flag). The gate also is set up with user priviliedges in order to generate the trap explicitly later with an int instruction.
+  */
+  SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER); 
 
   initlock(&tickslock, "time");
 }
@@ -33,6 +39,9 @@ idtinit(void)
 }
 
 //PAGEBREAK: 41
+/*
+Trap handler (executes and finds out what to do next based of the trap frame with the trap number it got. The trap number is a superset of the syscall number, and stored in the trapframe, and corresponds either to a trap, interrupt or exeption.
+*/
 void
 trap(struct trapframe *tf)
 {
