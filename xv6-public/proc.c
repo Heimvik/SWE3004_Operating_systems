@@ -631,8 +631,9 @@ void ps(int pid){
 			char state[10];
 			strprocstate(state, p->state);
 			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
-			release(&ptable.lock);
-			return;
+			break;
 		}
 	}
+	release(&ptable.lock);
+	return;
 }
