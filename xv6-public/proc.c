@@ -532,3 +532,107 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+/*
+Syscall setnice(int pid, int nice) shold have properties:
+Input:
+- The pid of the process to set the nice value of
+- The nice value to set
+
+Output:
+- 0 on successfull set of nicevalue
+- -1 on no process that has the pid value || not valid pid
+*/
+int setnice(int pid, int nice){
+	if(nice<0 || nice > 39){
+		return -1;
+	}
+	aquire(&ptable.lock);
+	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		if(pid == p->pid){
+			p->nice = nice;
+			release(&ptable.lock);
+			return 0; 
+		}
+	}
+	release(&ptable.lock);
+	return -1;
+}
+
+/*
+Syscall getnice(int pid) shold have properties:
+Input:
+- The pid of the process we want to get the nice value of.
+
+Output:
+- nice value of target process on success
+- -1 if unsuccessfull (no process with the pelected pid)
+*/
+int getnice(int pid){
+	aquire(&ptable.lock);
+	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		if(pid == p->pid){
+			int nice = p->nice; //Neccessary as we cannot defer the release of mutex unil after return
+			release(&ptable.lock);
+			return nice;
+		}
+	}
+	release(&ptable.lock);
+	return -1;
+}
+
+/*
+Helper function to convert the procstate to a string
+*/
+void strprocstate(char* result,enum procstate state){
+	switch(state){
+		case(UNUSED):
+			safestrcpy(result, "UNUSED", 10);
+			break;
+		case(EMBRYO):
+			safestrcpy(result, "EMBRYO", 10);
+			break;
+		case(SLEEPING):
+			safestrcpy(result, "SLEEPING", 10);
+			break;
+		case(RUNNABLE):
+			safestrcpy(result, "RUNNABLE", 10);
+			break;
+		case(RUNNING):
+			safestrcpy(result, "RUNNING", 10);
+			break;
+		case(ZOMBIE):
+			safestrcpy(result, "ZOMBIE", 10);
+			break;
+	}
+}
+
+/*
+Syscall ps(int pid)
+Should print name, pid, state and nice of:
+- All processes if pid = 0
+- The process with the pid value if pid != 0
+- Nothing if pid not in process list
+
+Input:
+- The pid of any process that we want to display, all if pid = 0;'
+*/
+void ps(int pid){
+	aquire(&ptable.lock);
+	char* header = "Name\tPID\tState\tPriority\n";
+	struct proc* p;
+	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+		if(pid == 0){
+			cprintf(header);
+			char state[10];
+			strprocstate(state, p->state);
+			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
+		} else if(pid == p->pid){
+			char state[10];
+			strprocstate(state, p->state);
+			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
+			release(&ptable.lock);
+			return;
+		}
+	}
+}

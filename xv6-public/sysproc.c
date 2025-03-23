@@ -89,3 +89,6 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+//Get the nice value of the currently executing process
+
