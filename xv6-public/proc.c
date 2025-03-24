@@ -621,20 +621,20 @@ void ps(int pid){
 	acquire(&ptable.lock);
 	if(pid==0){
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-			cprintf("NAME\t\tPID\t\tSTATE\t\tNICE\n");
+			int hasHeader = 0;
+			if(!hasHeader){
+				cprintf("NAME\t\t\tPID\tSTATE\t\t\tNICE\n");
+				hasHeader = 1;
+			}
 			cprintf("%s\t\t%d\t\t",p->name,p->pid);
 			char strstate[10];
 			strprocstate(strstate,p->state);
 			cprintf("%s\t\t%d\n",strstate,p->nice);
 		}
 	} else if(pid>0){
-		int hasHeader = 0;
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(pid == p->pid){
-				if(!hasHeader){
-					cprintf("NAME\t\t\tPID\tSTATE\t\t\tNICE\n");
-					hasHeader = 1;
-				}
+				cprintf("NAME\t\t\tPID\tSTATE\t\tNICE\n");
 				cprintf("%s\t\t%d\t\t",p->name,p->pid);
 				char strstate[10];
 				strprocstate(strstate,p->state);
