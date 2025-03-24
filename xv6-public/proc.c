@@ -659,7 +659,7 @@ void ps(int pid){
 		p++;
 	}
 	release(&ptable.lock); //Release the lock to ptable asap
-	printf(1,"DBGx1");
+	cprintf("DBGx1");
 	for(int i = 0;i<NFIELDS;i++){
 		safestrcpy(content[0][i],header[i],FIELDSIZE-1);
 	}
