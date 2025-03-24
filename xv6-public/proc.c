@@ -582,7 +582,7 @@ int getnice(int pid){
 }
 
 /*
-Helper function to convert the procstate to a string
+Helper functions for ps syscall
 */
 void strprocstate(char* result,enum procstate state){
 	switch(state){
@@ -613,6 +613,22 @@ void cprintfpad(const char *str, int width) {
         cprintf(" ");  // Add spaces for padding
     }
 }
+void printheader(){
+	cprintfpad("NAME",FIELDSIZE);
+	cprintf("PID\t\t");
+	cprintfpad("STATE",FIELDSIZE);
+	cprintf("NICE\t\t");
+	cprintf("\n");
+}
+void printcontent(struct proc* p){
+	cprintfpad(p->name,FIELDSIZE);
+	cprintf("%d\t\t",p->pid);
+	char strstate[10];
+	strprocstate(strstate,p->state);
+	cprintfpad(strstate,FIELDSIZE);
+	cprintf("%d\t\t",p->nice);
+	cprintf("\n");
+}
 
 /*
 Syscall ps(int pid)
@@ -630,36 +646,16 @@ void ps(int pid){
 		int hasHeader = 0;
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(!hasHeader){
-				cprintfpad("NAME",FIELDSIZE);
-				cprintf("PID\t");
-				cprintfpad("STATE",FIELDSIZE);
-				cprintf("NICE\t");
-				cprintf("\n");
+				printheader();
 				hasHeader = 1;
 			}
-			cprintfpad(p->name,FIELDSIZE);
-			cprintf("%d\t",p->pid);
-			char strstate[10];
-			strprocstate(strstate,p->state);
-			cprintfpad(strstate,FIELDSIZE);
-			cprintf("%d\t",p->nice);
-			cprintf("\n");
+			printcontent(p);
 		}
 	} else if(pid>0){
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(pid == p->pid){
-				cprintfpad("NAME",FIELDSIZE);
-				cprintf("PID\t");
-				cprintfpad("STATE",FIELDSIZE);
-				cprintf("NICE\t");
-				cprintf("\n");
-				cprintfpad(p->name,FIELDSIZE);
-				cprintf("%d\t",p->pid);
-				char strstate[10];
-				strprocstate(strstate,p->state);
-				cprintfpad(strstate,FIELDSIZE);
-				cprintf("%d\t",p->nice);
-				cprintf("\n");
+				printheader();
+				printcontent(p);
 				break;
 			}
 		}
