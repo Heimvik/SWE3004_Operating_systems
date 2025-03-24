@@ -646,7 +646,6 @@ void ps(int pid){
 	acquire(&ptable.lock);
 	struct proc* p = ptable.proc;
 	for(int procindex = 1; procindex<1+NPROC; procindex++){
-		cprintf("DBG%d",procindex);
 		strprocstate(strstate,p->state);
 		safestrcpy(content[procindex][0],(char*)(p->name),strlen(p->name));
 		safestrcpy(content[procindex][1],(char*)(&(p->pid)),sizeof(char));
@@ -663,9 +662,11 @@ void ps(int pid){
 	for(int i = 0;i<NFIELDS;i++){
 		safestrcpy(content[0][i],header[i],FIELDSIZE-1);
 	}
+	cprintf("DBGx2");
 	if(singleprocindex != -1){
 		char strprint[2*NFIELDS*(FIELDSIZE+2)];
 		memmove((void*)content[1],(void*)content[singleprocindex],(uint)(NFIELDS*FIELDSIZE));
+		cprintf("DBGx3");
 		strformatps(strprint,2,NFIELDS,(char***)content);
 		cprintf(strprint);
 	} else {
