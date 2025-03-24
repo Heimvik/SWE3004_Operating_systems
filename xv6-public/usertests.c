@@ -1745,106 +1745,57 @@ rand()
   return randstate;
 }
 
-void syscalls(){
-	printf(1,"PS TEST\n");
-	for(int i = 0; i < 5; i++){
-		int pid = fork();
-		if(pid == 0){
-			printf(1,"Child %d doing ps(%d)\n", i,i);
-			ps(i);
-			exit();
-		}
-		wait();
-	}
-	printf(1,"SETNICE TEST\n");
-	int validnice = 21;
-	int invalidnice_h = 100;
-	int invalidnice_l = -1;
-	for(int i = 0; i < 5; i++){
-		int pid = fork();
-		if(pid == 0){
-			if(i == 2){
-				printf(1,"Child setting nice of PID %d to %d\n", i, invalidnice_h);
-				printf("Returns:%d",setnice(i,invalidnice_h));
-			}
-			else if(i == 3){
-				printf(1,"Child setting nice of PID %d to %d\n", i, invalidnice_l);
-				printf("Returns:%d",setnice(i,invalidnice_l));
-			} else {
-				printf(1,"Child setting nice of PID %d to %d\n", i, validnice);
-				printf("Returns:%d",setnice(i,validnice));
-			}
-			exit();
-		}
-		wait();
-	}
-	printf(1,"GETNICE TEST\n");
-	for(int i = 0; i < 5; i++){
-		int pid = fork();
-		if(pid == 0){
-			printf(1,"Child getting nice of PID %d \n", i);
-			printf("Returns:%d",getnice(i));
-			exit();
-		}
-		wait();
-	}
-	printf(1,"DONE\n");
-	exit();
-}
-
 int
 main(int argc, char *argv[])
 {
-  printf(1, "usertests starting\n");
+	printf(1, "usertests starting\n");
+	if(open("usertests.ran", 0) >= 0){
+		printf(1, "already ran user tests -- rebuild fs.img\n");
+		exit();
+	}
+	close(open("usertests.ran", O_CREATE));
 
-  if(open("usertests.ran", 0) >= 0){
-    printf(1, "already ran user tests -- rebuild fs.img\n");
-    exit();
-  }
-  close(open("usertests.ran", O_CREATE));
+	argptest();
+	createdelete();
+	linkunlink();
+	concreate();
+	fourfiles();
+	sharedfd();
 
-  argptest();
-  createdelete();
-  linkunlink();
-  concreate();
-  fourfiles();
-  sharedfd();
+	bigargtest();
+	bigwrite();
+	bigargtest();
+	bsstest();
+	sbrktest();
+	validatetest();
 
-  bigargtest();
-  bigwrite();
-  bigargtest();
-  bsstest();
-  sbrktest();
-  validatetest();
+	opentest();
+	writetest();
+	writetest1();
+	createtest();
 
-  opentest();
-  writetest();
-  writetest1();
-  createtest();
+	openiputtest();
+	exitiputtest();
+	iputtest();
 
-  openiputtest();
-  exitiputtest();
-  iputtest();
+	mem();
+	pipe1();
+	preempt();
+	exitwait();
 
-  mem();
-  pipe1();
-  preempt();
-  exitwait();
+	rmdot();
+	fourteen();
+	bigfile();
+	subdir();
+	linktest();
+	unlinkread();
+	dirfile();
+	iref();
+	forktest();
+	bigdir(); // slow
 
-  rmdot();
-  fourteen();
-  bigfile();
-  subdir();
-  linktest();
-  unlinkread();
-  dirfile();
-  iref();
-  forktest();
-  bigdir(); // slow
+	uio();
 
-  uio();
-
-  exectest();
-
-  exit();
+	exectest();
+	exit();
 }
