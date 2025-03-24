@@ -617,7 +617,7 @@ void printheader(){
 	cprintfpad("NAME",FIELDSIZE);
 	cprintf("PID\t\t");
 	cprintfpad("STATE",FIELDSIZE);
-	cprintf("NICE\t\t");
+	cprintf("PRIORITY\t\t");
 	cprintf("\n");
 }
 void printcontent(struct proc* p){
@@ -661,5 +661,4 @@ void ps(int pid){
 		}
 	}
 	release(&ptable.lock);
-	
 }
