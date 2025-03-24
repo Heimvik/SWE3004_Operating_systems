@@ -547,7 +547,7 @@ int setnice(int pid, int nice){
 	if(nice<0 || nice > 39){
 		return -1;
 	}
-	aquire(&ptable.lock);
+	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(pid == p->pid){
 			p->nice = nice;
@@ -569,7 +569,7 @@ Output:
 - -1 if unsuccessfull (no process with the pelected pid)
 */
 int getnice(int pid){
-	aquire(&ptable.lock);
+	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(pid == p->pid){
 			int nice = p->nice; //Neccessary as we cannot defer the release of mutex unil after return
@@ -618,9 +618,8 @@ Input:
 - The pid of any process that we want to display, all if pid = 0;'
 */
 void ps(int pid){
-	aquire(&ptable.lock);
+	acquire(&ptable.lock);
 	char* header = "Name\tPID\tState\tPriority\n";
-	struct proc* p;
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(pid == 0){
 			cprintf(header);
