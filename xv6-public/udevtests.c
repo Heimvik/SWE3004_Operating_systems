@@ -25,7 +25,7 @@ void testsyscalls(){
 	        }
 	}
 	printf(1,"\nGETNICE TEST\n");
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < 6; i++){
 		printf(1,"Child getting nice of PID %d \n", i);
 		printf(1,"Returns:%d\n",getnice(i));
 	}

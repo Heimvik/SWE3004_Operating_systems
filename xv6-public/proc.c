@@ -549,7 +549,7 @@ int setnice(int pid, int nice){
 	}
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == p->pid){
+		if(pid == p->pid && pid != 0){
 			p->nice = nice;
 			release(&ptable.lock);
 			return 0; 
@@ -571,7 +571,7 @@ Output:
 int getnice(int pid){
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == p->pid){
+		if(pid == p->pid && pid != 0){
 			int nice = p->nice; //Neccessary as we cannot defer the release of mutex unil after return
 			release(&ptable.lock);
 			return nice;
@@ -630,22 +630,36 @@ void ps(int pid){
 		int hasHeader = 0;
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(!hasHeader){
-				cprintf("NAME\t\tPID\tSTATE\t\tNICE\n");
+				cprintfpad("NAME",FIELDSIZE);
+				cprintf("PID\t");
+				cprintfpad("STATE",FIELDSIZE);
+				cprintf("NICE\t");
+				cprintf("\n");
 				hasHeader = 1;
 			}
-			cprintf("%s\t\t%d\t\t",p->name,p->pid);
+			cprintfpad(p->name,FIELDSIZE);
+			cprintf("%d\t",p->pid);
 			char strstate[10];
 			strprocstate(strstate,p->state);
-			cprintf("%s\t\t%d\n",strstate,p->nice);
+			cprintfpad(strstate,FIELDSIZE);
+			cprintf("%d\t",p->nice);
+			cprintf("\n");
 		}
 	} else if(pid>0){
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(pid == p->pid){
-				cprintf("NAME\t\tPID\tSTATE\t\tNICE\n");
-				cprintf("%s\t\t%d\t\t",p->name,p->pid);
+				cprintfpad("NAME",FIELDSIZE);
+				cprintf("PID\t");
+				cprintfpad("STATE",FIELDSIZE);
+				cprintf("NICE\t");
+				cprintf("\n");
+				cprintfpad(p->name,FIELDSIZE);
+				cprintf(p->pid);
 				char strstate[10];
 				strprocstate(strstate,p->state);
-				cprintf("%s\t\t%d\n",strstate,p->nice);
+				cprintfpad(strstate,FIELDSIZE);
+				cprintf("%d\t",p->nice);
+				cprintf("\n");
 				break;
 			}
 		}
