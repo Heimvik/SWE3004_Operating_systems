@@ -619,17 +619,24 @@ Input:
 */
 void ps(int pid){
 	acquire(&ptable.lock);
-	char* header = "Name\tPID\tState\tPriority\n";
+	char* header = "Name\t\tPID\t\tState\t\tPriority\n";
+	int headerprinted = 0;
+	char state[10];
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == 0){
-			cprintf(header);
-			char state[10];
+		if(pid == 0 && p->state != UNUSED){
+			if(!headerprinted){
+				cprintf(header);
+				headerprinted++;
+			}
 			strprocstate(state, p->state);
-			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
+			cprintf("%s\t\t%d\t\t%s\t\t%d\n", p->name, p->pid, state, p->nice);
 		} else if(pid == p->pid){
-			char state[10];
+			if(!headerprinted){
+				cprintf(header);
+				headerprinted++;
+			}
 			strprocstate(state, p->state);
-			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
+			cprintf("%s\t\t%d\t\t%s\t\t%d\n", p->name, p->pid, state, p->nice);
 			break;
 		}
 	}
