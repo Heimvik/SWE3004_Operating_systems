@@ -21,6 +21,7 @@ void testsyscalls(){
 			printf(1,"Returns:%d\n",setnice(i,invalidnice_l));
 		} else {
 			printf(1,"Child setting nice of PID %d to %d\n", i, validnice);
+			printf(1,"Returns:%d\n",setnice(i,validnice));
 	        }
 	}
 	printf(1,"\nGETNICE TEST\n");

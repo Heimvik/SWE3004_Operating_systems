@@ -606,6 +606,13 @@ void strprocstate(char* result,enum procstate state){
 			break;
 	}
 }
+void cprintfpad(const char *str, int width) {
+    int len = strlen(str);
+    cprintf("%s", str);  // Print the string
+    for (int i = len; i < width; i++) {
+        cprintf(" ");  // Add spaces for padding
+    }
+}
 
 /*
 Syscall ps(int pid)
@@ -623,7 +630,7 @@ void ps(int pid){
 		int hasHeader = 0;
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(!hasHeader){
-				cprintf("NAME\t\t\tPID\tSTATE\t\t\tNICE\n");
+				cprintf("NAME\t\tPID\tSTATE\t\tNICE\n");
 				hasHeader = 1;
 			}
 			cprintf("%s\t\t%d\t\t",p->name,p->pid);
@@ -634,7 +641,7 @@ void ps(int pid){
 	} else if(pid>0){
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(pid == p->pid){
-				cprintf("NAME\t\t\tPID\tSTATE\t\tNICE\n");
+				cprintf("NAME\t\tPID\tSTATE\t\tNICE\n");
 				cprintf("%s\t\t%d\t\t",p->name,p->pid);
 				char strstate[10];
 				strprocstate(strstate,p->state);
