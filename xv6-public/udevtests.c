@@ -1,4 +1,4 @@
-
+#include "types.h"
 #include "user.h"
 
 void testsyscalls(){
@@ -21,14 +21,14 @@ void testsyscalls(){
 		if(pid == 0){
 			if(i == 2){
 				printf(1,"Child setting nice of PID %d to %d\n", i, invalidnice_h);
-				printf("Returns:%d",setnice(i,invalidnice_h));
+				printf(1,"Returns:%d",setnice(i,invalidnice_h));
 			}
 			else if(i == 3){
 				printf(1,"Child setting nice of PID %d to %d\n", i, invalidnice_l);
-				printf("Returns:%d",setnice(i,invalidnice_l));
+				printf(1,"Returns:%d",setnice(i,invalidnice_l));
 			} else {
 				printf(1,"Child setting nice of PID %d to %d\n", i, validnice);
-				printf("Returns:%d",setnice(i,validnice));
+				printf(1,"Returns:%d",setnice(i,validnice));
 			}
 			exit();
 		}
@@ -39,7 +39,7 @@ void testsyscalls(){
 		int pid = fork();
 		if(pid == 0){
 			printf(1,"Child getting nice of PID %d \n", i);
-			printf("Returns:%d",getnice(i));
+			printf(1,"Returns:%d",getnice(i));
 			exit();
 		}
 		wait();
@@ -49,13 +49,6 @@ void testsyscalls(){
 }
 
 int main(int argc, char *argv[]){
-    switch (*(argv[1]))
-    {
-    case '1':
-        testsyscalls();
-        break;
-    default:
-        break;
-    }
+    testsyscalls();
     exit();
 }
