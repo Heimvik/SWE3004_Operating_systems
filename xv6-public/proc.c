@@ -654,7 +654,7 @@ void ps(int pid){
 				cprintf("NICE\t");
 				cprintf("\n");
 				cprintfpad(p->name,FIELDSIZE);
-				cprintf(p->pid);
+				cprintf("%d\t",p->pid);
 				char strstate[10];
 				strprocstate(strstate,p->state);
 				cprintfpad(strstate,FIELDSIZE);
