@@ -549,7 +549,7 @@ int setnice(int pid, int nice){
 	}
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == p->pid){
+		if(pid == p->pid && pid != 0){
 			p->nice = nice;
 			release(&ptable.lock);
 			return 0; 
@@ -571,7 +571,7 @@ Output:
 int getnice(int pid){
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == p->pid){
+		if(pid == p->pid && pid != 0){
 			int nice = p->nice; //Neccessary as we cannot defer the release of mutex unil after return
 			release(&ptable.lock);
 			return nice;
@@ -582,7 +582,7 @@ int getnice(int pid){
 }
 
 /*
-Helper function to convert the procstate to a string
+Helper functions for ps syscall
 */
 void strprocstate(char* result,enum procstate state){
 	switch(state){
@@ -606,6 +606,29 @@ void strprocstate(char* result,enum procstate state){
 			break;
 	}
 }
+void cprintfpad(const char *str, int width) {
+    int len = strlen(str);
+    cprintf("%s", str);  // Print the string
+    for (int i = len; i < width; i++) {
+        cprintf(" ");  // Add spaces for padding
+    }
+}
+void printheader(){
+	cprintfpad("NAME",FIELDSIZE);
+	cprintf("PID\t\t");
+	cprintfpad("STATE",FIELDSIZE);
+	cprintf("PRIORITY\t\t");
+	cprintf("\n");
+}
+void printcontent(struct proc* p){
+	cprintfpad(p->name,FIELDSIZE);
+	cprintf("%d\t\t",p->pid);
+	char strstate[10];
+	strprocstate(strstate,p->state);
+	cprintfpad(strstate,FIELDSIZE);
+	cprintf("%d\t\t",p->nice);
+	cprintf("\n");
+}
 
 /*
 Syscall ps(int pid)
@@ -619,20 +642,23 @@ Input:
 */
 void ps(int pid){
 	acquire(&ptable.lock);
-	char* header = "Name\tPID\tState\tPriority\n";
-	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == 0){
-			cprintf(header);
-			char state[10];
-			strprocstate(state, p->state);
-			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
-		} else if(pid == p->pid){
-			char state[10];
-			strprocstate(state, p->state);
-			cprintf("%s\t%d\t%s\t%d\n", p->name, p->pid, state, p->nice);
-			break;
+	if(pid==0){
+		int hasHeader = 0;
+		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+			if(!hasHeader){
+				printheader();
+				hasHeader = 1;
+			}
+			printcontent(p);
+		}
+	} else if(pid>0){
+		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+			if(pid == p->pid){
+				printheader();
+				printcontent(p);
+				break;
+			}
 		}
 	}
 	release(&ptable.lock);
-	return;
 }
