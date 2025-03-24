@@ -615,9 +615,11 @@ void strformatps(char* dst,const int nrows, const int nfields, char*** content){
 			char* currentchar = content[row][field];
 			while(*(currentchar)!= '\0'){
 				dst[dstindex++] = (*currentchar++);
+				cprintf("%c",dst[dstindex-1]);
 			}
 			while(dstindex%FIELDSIZE != 0){
 				dst[dstindex++] = ' ';
+				cprintf("%c",dst[dstindex-1]);
 			}
 			dst[dstindex++] = '|';
 		}
@@ -626,6 +628,8 @@ void strformatps(char* dst,const int nrows, const int nfields, char*** content){
 	dst[dstindex] = '\0';
 	return;
 }
+
+
 /*
 Syscall ps(int pid)
 Should print name, pid, state and nice of:
@@ -658,15 +662,12 @@ void ps(int pid){
 		p++;
 	}
 	release(&ptable.lock); //Release the lock to ptable asap
-	cprintf("DBGx1");
 	for(int i = 0;i<NFIELDS;i++){
 		safestrcpy(content[0][i],header[i],FIELDSIZE-1);
 	}
-	cprintf("DBGx2");
 	if(singleprocindex != -1){
 		char strprint[2*NFIELDS*(FIELDSIZE+2)];
 		memmove((void*)content[1],(void*)content[singleprocindex],(uint)(NFIELDS*FIELDSIZE));
-		cprintf("DBGx3");
 		strformatps(strprint,2,NFIELDS,(char***)content);
 		cprintf(strprint);
 	} else {
