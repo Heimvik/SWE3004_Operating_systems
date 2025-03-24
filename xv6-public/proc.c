@@ -607,7 +607,7 @@ void strprocstate(char* result,enum procstate state){
 	}
 }
 
-void strformatps(char* dst,const int nrows, const int nfields, const char*** content){
+void strformatps(char* dst,const int nrows, const int nfields, char*** content){
 	int dstindex = 0;
 	for(int row = 0;row<nrows;row++){
 		for(int field = 0;field<nfields;field++){
@@ -637,7 +637,7 @@ Input:
 - The pid of any process that we want to display, all if pid = 0;'
 */
 void ps(int pid){
-    const char header[NFIELDS] = {"Name","PID","STATE", "PRIORITY"};
+    const char* header[NFIELDS] = {"Name","PID","STATE", "PRIORITY"};
 	char content[1+NPROC][NFIELDS][FIELDSIZE];
 
 	char strstate[10];
@@ -647,9 +647,9 @@ void ps(int pid){
 	struct proc* p = ptable.proc;
 	for(int procindex = 1; procindex<1+NPROC; procindex++){
 		strprocstate(strstate,p->state);
-		safestrcpy(content[procindex][0],p->name,strlen(p->name));
+		safestrcpy(content[procindex][0],&(p->name),strlen(p->name));
 		safestrcpy(content[procindex][1],(char*)(&(p->pid)),sizeof(char));
-		safestrcpy(content[procindex][2],strstate,strlen(strstate));
+		safestrcpy(content[procindex][2],&strstate,strlen(strstate));
 		safestrcpy(content[procindex][3],(char*)(&(p->nice)),sizeof(char));
 		if(pid == p->pid){
 			singleprocindex = procindex;
@@ -665,11 +665,11 @@ void ps(int pid){
 	if(singleprocindex != -1){
 		char strprint[2*NFIELDS*(FIELDSIZE+2)];
 		memmove((void*)content[1],(void*)content[singleprocindex],(uint)(NFIELDS*FIELDSIZE));
-		strformatps(strprint,2,NFIELDS,content);
+		strformatps(strprint,2,NFIELDS,(char***)content);
 		cprintf(strprint);
 	} else {
 		char strprint[NPROC*NFIELDS*(FIELDSIZE+2)];
-		strformatps(strprint,NPROC,NFIELDS,content);
+		strformatps(strprint,NPROC,NFIELDS,(char***)content);
 		cprintf(strprint);
 	}
 	return;
