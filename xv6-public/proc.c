@@ -618,19 +618,22 @@ Input:
 - The pid of any process that we want to display, all if pid = 0;'
 */
 void ps(int pid){
-	const char* header[NFIELDS] = {"Name","PID","STATE", "PRIORITY"};
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc;p < &ptable.proc[NPROC]; p++){
 		if(pid == 0){
-			cprintf("Name: %s, PID: %d, STATE: ",p->name,p->pid);
+			cprintf("NAME\t\tPID\tSTATE\t\tPRIORITY\n");
+			cprintf("---------------------------------------------\n");
+			cprintf("%s\t\t%d\t", p->name, p->pid);
 			char strstate[10];
-			strprocstate(strstate,p->state);
-			cprintf("%s, PRIORITY: %d\n",strstate,p->nice);
+			strprocstate(strstate, p->state);
+			cprintf("%s\t\t%d\n", strstate, p->nice);
 		} else if(pid == p->pid){
-			cprintf("Name: %s, PID: %d, STATE: ",p->name,p->pid);
+			cprintf("NAME\t\tPID\tSTATE\t\tPRIORITY\n");
+			cprintf("---------------------------------------------\n");
+			cprintf("%s\t\t%d\t", p->name, p->pid);
 			char strstate[10];
-			strprocstate(strstate,p->state);
-			cprintf("%s, PRIORITY: %d\n",strstate,p->nice);
+			strprocstate(strstate, p->state);
+			cprintf("%s\t\t%d\n", strstate, p->nice);
 			release(&ptable.lock);
 			return;
 		}
