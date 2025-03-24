@@ -612,8 +612,10 @@ void strformatps(char* dst,const int nrows, const int nfields, char*** content){
 	for(int row = 0;row<nrows;row++){
 		for(int field = 0;field<nfields;field++){
 			dst[dstindex++] = '|';
+			cprintf("Got here");
 			char* currentchar = content[row][field];
 			while(*(currentchar)!= '\0'){
+				cprintf("Got here x");
 				dst[dstindex++] = (*currentchar++);
 				cprintf("%c",dst[dstindex-1]);
 			}
