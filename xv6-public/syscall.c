@@ -103,6 +103,9 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_setnice(void);
+extern int sys_getnice(void);
+extern int sys_ps(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -126,6 +129,9 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_setnice] sys_setnice,
+[SYS_getnice] sys_getnice,
+[SYS_ps]      sys_ps,
 };
 
 void
@@ -136,8 +142,7 @@ syscall(void)
 
   num = curproc->tf->eax;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    curproc->tf->eax = syscalls[num](); 
-    /* Here is the actual entry point to the system call function (invoked and the return value will be put in current process eax register upon returning to the user mode again. That is when restoring the current process from the kernel stack. curpoc is a pointer to the kernel stack.*/    
+    curproc->tf->eax = syscalls[num]();
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);

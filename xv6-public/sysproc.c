@@ -90,5 +90,31 @@ sys_uptime(void)
   return xticks;
 }
 
-//Get the nice value of the currently executing process
+/*
+Calling the wrapper functions here, using the helper functions to retreive
+the arguments from the user stack and then calling the actual functionality.
+*/
 
+int sys_setnice(void){
+	int pid, nice;
+	if(argint(0,&pid) < 0 || argint(1,&nice)<0){
+		return -1;
+	}
+	return setnice(pid,nice);
+}
+
+int sys_getnice(void){
+	int pid;
+	if(argint(0,&pid) < 0){
+		return -1;
+	}
+	return getnice(pid);
+}
+
+void sys_ps(void){
+	int pid;
+	if(argint(0,&pid) < 0){
+		return;
+	}
+	return ps(pid);
+}

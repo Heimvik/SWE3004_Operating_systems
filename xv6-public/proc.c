@@ -620,7 +620,6 @@ Input:
 void ps(int pid){
 	aquire(&ptable.lock);
 	char* header = "Name\tPID\tState\tPriority\n";
-	struct proc* p;
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(pid == 0){
 			cprintf(header);
