@@ -607,6 +607,25 @@ void strprocstate(char* result,enum procstate state){
 	}
 }
 
+void strformatps(char* dst,const int nrows, const int nfields, const char*** content){
+	int dstindex = 0;
+	for(int row = 0;row<nrows;row++){
+		for(int field = 0;field<nfields;field++){
+			dst[dstindex++] = '|';
+			char* currentchar = content[row][field];
+			while(*(currentchar)!= '\0'){
+				dst[dstindex++] = (*currentchar++);
+			}
+			while(dstindex%FIELDSIZE != 0){
+				dst[dstindex++] = ' ';
+			}
+			dst[dstindex++] = '|';
+		}
+		dst[dstindex++] = '\n';
+	}
+	dst[dstindex] = '\0';
+	return;
+}
 /*
 Syscall ps(int pid)
 Should print name, pid, state and nice of:
@@ -618,28 +637,40 @@ Input:
 - The pid of any process that we want to display, all if pid = 0;'
 */
 void ps(int pid){
+    const char header[NFIELDS] = {"Name","PID","STATE", "PRIORITY"};
+	char content[1+NPROC][NFIELDS][FIELDSIZE];
+
+	char strstate[10];
+	int singleprocindex= -1;
+
 	acquire(&ptable.lock);
-	char* header = "Name\t\tPID\t\tState\t\tPriority\n";
-	int headerprinted = 0;
-	char state[10];
-	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-		if(pid == 0 && p->state != UNUSED){
-			if(!headerprinted){
-				cprintf(header);
-				headerprinted++;
-			}
-			strprocstate(state, p->state);
-			cprintf("%s\t\t%d\t\t%s\t\t%d\n", p->name, p->pid, state, p->nice);
-		} else if(pid == p->pid){
-			if(!headerprinted){
-				cprintf(header);
-				headerprinted++;
-			}
-			strprocstate(state, p->state);
-			cprintf("%s\t\t%d\t\t%s\t\t%d\n", p->name, p->pid, state, p->nice);
+	struct proc* p = ptable.proc;
+	for(int procindex = 1; procindex<1+NPROC; procindex++){
+		strprocstate(strstate,p->state);
+		safestrcpy(content[procindex][0],p->name,strlen(p->name));
+		safestrcpy(content[procindex][1],(char*)(&(p->pid)),sizeof(char));
+		safestrcpy(content[procindex][2],strstate,strlen(strstate));
+		safestrcpy(content[procindex][3],(char*)(&(p->nice)),sizeof(char));
+		if(pid == p->pid){
+			singleprocindex = procindex;
 			break;
 		}
+		p++;
 	}
-	release(&ptable.lock);
+	release(&ptable.lock); //Release the lock to ptable asap
+
+	for(int i = 0;i<NFIELDS;i++){
+		safestrcpy(content[0][i],header[i],FIELDSIZE-1);
+	}
+	if(singleprocindex != -1){
+		char strprint[2*NFIELDS*(FIELDSIZE+2)];
+		memmove((void*)content[1],(void*)content[singleprocindex],(uint)(NFIELDS*FIELDSIZE));
+		strformatps(strprint,2,NFIELDS,content);
+		cprintf(strprint);
+	} else {
+		char strprint[NPROC*NFIELDS*(FIELDSIZE+2)];
+		strformatps(strprint,NPROC,NFIELDS,content);
+		cprintf(strprint);
+	}
 	return;
 }

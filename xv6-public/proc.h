@@ -57,3 +57,8 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+
+//ps related defines
+#define FIELDSIZE 19+1 //19 for chars+1 for delimiter
+#define NFIELDS 4
