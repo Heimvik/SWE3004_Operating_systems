@@ -614,7 +614,7 @@ void printtable(char content[1+NPROC][NFIELDS][FIELDSIZE]) {
 
     // Print process rows
     for (int i = 1; i < 1+NPROC; i++) {
-        cprintf("%s %s %s %s\n", content[i][0], content[i][1], content[i][2], content[i][3]);
+        cprintf("%d | %d | %d | %d\n", content[i][0], content[i][1], content[i][2], content[i][3]);
     }
 	cprintf("Done printing\n");
 }
