@@ -628,9 +628,13 @@ void ps(int pid){
 			cprintf("%s\t\t%d\n",strstate,p->nice);
 		}
 	} else if(pid>0){
+		int hasHeader = 0;
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(pid == p->pid){
-				cprintf("NAME\t\t\tPID\tSTATE\t\t\tNICE\n");
+				if(!hasHeader){
+					cprintf("NAME\t\t\tPID\tSTATE\t\t\tNICE\n");
+					hasHeader = 1;
+				}
 				cprintf("%s\t\t%d\t\t",p->name,p->pid);
 				char strstate[10];
 				strprocstate(strstate,p->state);
