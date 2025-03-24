@@ -647,9 +647,9 @@ void ps(int pid){
 	struct proc* p = ptable.proc;
 	for(int procindex = 1; procindex<1+NPROC; procindex++){
 		strprocstate(strstate,p->state);
-		safestrcpy(content[procindex][0],&(p->name),strlen(p->name));
+		safestrcpy(content[procindex][0],(char*)(p->name),strlen(p->name));
 		safestrcpy(content[procindex][1],(char*)(&(p->pid)),sizeof(char));
-		safestrcpy(content[procindex][2],&strstate,strlen(strstate));
+		safestrcpy(content[procindex][2],(char*)strstate,strlen(strstate));
 		safestrcpy(content[procindex][3],(char*)(&(p->nice)),sizeof(char));
 		if(pid == p->pid){
 			singleprocindex = procindex;
