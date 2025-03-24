@@ -607,21 +607,29 @@ void strprocstate(char* result,enum procstate state){
 	}
 }
 
+// Function to print the table
+void printtable(char content[1+NPROC][NFIELDS][FIELDSIZE]) {
+    // Print header row
+    cprintf("%s %s %s %s\n", content[0][0], content[0][1], content[0][2], content[0][3]);
+
+    // Print process rows
+    for (int i = 1; i < 1+NPROC; i++) {
+        cprintf("%-20s %-20s %-20s %-20s\n", content[i][0], content[i][1], content[i][2], content[i][3]);
+    }
+}
+
+
 void strformatps(char* dst,const int nrows, const int nfields, char*** content){
 	int dstindex = 0;
 	for(int row = 0;row<nrows;row++){
 		for(int field = 0;field<nfields;field++){
 			dst[dstindex++] = '|';
-			cprintf("Got here");
 			char* currentchar = content[row][field];
 			while(*(currentchar)!= '\0'){
-				cprintf("Got here x");
 				dst[dstindex++] = (*currentchar++);
-				cprintf("%c",dst[dstindex-1]);
 			}
 			while(dstindex%FIELDSIZE != 0){
 				dst[dstindex++] = ' ';
-				cprintf("%c",dst[dstindex-1]);
 			}
 			dst[dstindex++] = '|';
 		}
@@ -670,6 +678,7 @@ void ps(int pid){
 	if(singleprocindex != -1){
 		char strprint[2*NFIELDS*(FIELDSIZE+2)];
 		memmove((void*)content[1],(void*)content[singleprocindex],(uint)(NFIELDS*FIELDSIZE));
+		printtable(content);
 		strformatps(strprint,2,NFIELDS,(char***)content);
 		cprintf(strprint);
 	} else {
