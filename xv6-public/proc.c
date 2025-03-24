@@ -630,7 +630,7 @@ void ps(int pid){
 	} else if(pid>0){
 		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 			if(pid == p->pid){
-				cprintf("NAME\t\tPID\t\tSTATE\t\tNICE\n");
+				cprintf("NAME\t\t\tPID\tSTATE\t\t\tNICE\n");
 				cprintf("%s\t\t%d\t\t",p->name,p->pid);
 				char strstate[10];
 				strprocstate(strstate,p->state);
