@@ -735,7 +735,7 @@ void printcontent(struct proc* p){
 	cprintfpad(strroverw,FIELDSIZE);
 	cprintfpad(strruntime,FIELDSIZE);
 	cprintfpad(strvruntime,FIELDSIZE);
-	cprintf("%d\n",p->schedstate.vruntime);
+	cprintf("|%d|",p->schedstate.vruntime);
 	cprintf("\n");
 }
 
