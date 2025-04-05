@@ -1,0 +1,182 @@
+desc: (none)
+cmd: ./hw14
+time_unit: i
+#-----------
+snapshot=0
+#-----------
+time=0
+mem_heap_B=0
+mem_heap_extra_B=0
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=1
+#-----------
+time=159792
+mem_heap_B=4
+mem_heap_extra_B=20
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=2
+#-----------
+time=159885
+mem_heap_B=8
+mem_heap_extra_B=16
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=3
+#-----------
+time=159978
+mem_heap_B=16
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=4
+#-----------
+time=160106
+mem_heap_B=32
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=5
+#-----------
+time=160304
+mem_heap_B=64
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=6
+#-----------
+time=160642
+mem_heap_B=128
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=7
+#-----------
+time=161260
+mem_heap_B=256
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=8
+#-----------
+time=162438
+mem_heap_B=512
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=9
+#-----------
+time=164736
+mem_heap_B=1024
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=detailed
+n1: 1024 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n1: 1024 0x109343: psuhFifo (hw14.c:47)
+  n1: 1024 0x109486: q8 (hw14.c:77)
+   n0: 1024 0x10958E: main (hw14.c:96)
+#-----------
+snapshot=10
+#-----------
+time=169274
+mem_heap_B=2048
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=11
+#-----------
+time=178292
+mem_heap_B=4096
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=12
+#-----------
+time=196270
+mem_heap_B=8192
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=13
+#-----------
+time=232168
+mem_heap_B=16384
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=14
+#-----------
+time=303906
+mem_heap_B=32768
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=15
+#-----------
+time=447324
+mem_heap_B=65536
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=16
+#-----------
+time=512949
+mem_heap_B=66560
+mem_heap_extra_B=16
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=17
+#-----------
+time=900718311
+mem_heap_B=66560
+mem_heap_extra_B=16
+mem_stacks_B=0
+heap_tree=peak
+n2: 66560 (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
+ n1: 65536 0x109343: psuhFifo (hw14.c:47)
+  n1: 65536 0x109486: q8 (hw14.c:77)
+   n0: 65536 0x10958E: main (hw14.c:96)
+ n1: 1024 0x48EB1B4: _IO_file_doallocate (filedoalloc.c:101)
+  n1: 1024 0x48FB523: _IO_doallocbuf (genops.c:347)
+   n1: 1024 0x48F8F8F: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:745)
+    n1: 1024 0x48F9AAE: _IO_new_file_xsputn (fileops.c:1244)
+     n1: 1024 0x48F9AAE: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1197)
+      n1: 1024 0x48C6CC8: __printf_buffer_flush_to_file (printf_buffer_to_file.c:59)
+       n1: 1024 0x48C6CC8: __printf_buffer_to_file_done (printf_buffer_to_file.c:120)
+        n1: 1024 0x48D1742: __vfprintf_internal (vfprintf-internal.c:1545)
+         n1: 1024 0x48C61B2: printf (printf.c:33)
+          n1: 1024 0x1094DB: q8 (hw14.c:80)
+           n0: 1024 0x10958E: main (hw14.c:96)
+#-----------
+snapshot=18
+#-----------
+time=900718311
+mem_heap_B=1024
+mem_heap_extra_B=8
+mem_stacks_B=0
+heap_tree=empty
+#-----------
+snapshot=19
+#-----------
+time=900721279
+mem_heap_B=0
+mem_heap_extra_B=0
+mem_stacks_B=0
+heap_tree=empty

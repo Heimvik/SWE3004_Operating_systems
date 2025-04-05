@@ -14,6 +14,19 @@ struct {
 
 static struct proc *initproc;
 
+static const int weights[40] = {
+  88818,     71054,     56843,     45475,     36380,
+  29104,     23283,     18626,     14901,     11921,
+  9537,     7629,     6104,     4883,     3906,
+  3125,     2500,     2000,     1600,     1280,
+  1024,     819,     655,     524,     419,
+  336,     268,     215,     172,     137,
+  110,     88,     70,     56,     45,
+  36,     29,     23,     18,     15,
+};
+
+static long long unsigned int totalticks = 0; // Total milliticks since boot [mticks] 
+
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
@@ -327,6 +340,7 @@ scheduler(void)
   c->proc = 0;
   
   for(;;){
+	totalticks+= 1000;
     // Enable interrupts on this processor.
     sti();
 
@@ -340,7 +354,7 @@ scheduler(void)
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       c->proc = p;
-      switchuvm(p);
+      switchuvm(p);  //Switche to the process's page table (each page table is spesific to a process)
       p->state = RUNNING;
 
       swtch(&(c->scheduler), p->context);
@@ -368,7 +382,7 @@ sched(void)
   int intena;
   struct proc *p = myproc();
 
-  if(!holding(&ptable.lock))
+  if(!holding(&ptable.lock)) 
     panic("sched ptable.lock");
   if(mycpu()->ncli != 1)
     panic("sched locks");
@@ -550,7 +564,7 @@ int setnice(int pid, int nice){
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(pid == p->pid && pid != 0){
-			p->nice = nice;
+			p->schedstate.nice = nice;
 			release(&ptable.lock);
 			return 0; 
 		}
@@ -572,7 +586,7 @@ int getnice(int pid){
 	acquire(&ptable.lock);
 	for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(pid == p->pid && pid != 0){
-			int nice = p->nice; //Neccessary as we cannot defer the release of mutex unil after return
+			int nice = p->schedstate.nice; //Neccessary as we cannot defer the release of mutex unil after return
 			release(&ptable.lock);
 			return nice;
 		}
@@ -606,6 +620,34 @@ void strprocstate(char* result,enum procstate state){
 			break;
 	}
 }
+
+int strint(int src, char *dst) {
+  if (dst == 0) {
+      return -1;
+  }
+  char temp[32];
+  int i = 0;
+  int isneg = 0;
+  if (src < 0) {
+      isneg = 1;
+      src = -src;
+  }
+  while (src > 0 || i == 0) {
+    temp[i++] = (src % 10) + '0'; // Converts a number to a string (NB: in reverse order)
+    src /= 10;
+  }
+  if (isneg) {
+      temp[i++] = '-';
+  }
+  int j = 0;
+  while (i > 0) {
+      dst[j++] = temp[--i]; //Reverses the strign back into the given buffer, FIFO-like
+  }
+  dst[j] = '\0';
+
+  return 1;
+}
+
 void cprintfpad(const char *str, int width) {
     int len = strlen(str);
     cprintf("%s", str);  // Print the string
@@ -615,18 +657,37 @@ void cprintfpad(const char *str, int width) {
 }
 void printheader(){
 	cprintfpad("NAME",FIELDSIZE);
-	cprintf("PID\t\t");
+	cprintfpad("PID",FIELDSIZE);
 	cprintfpad("STATE",FIELDSIZE);
-	cprintf("PRIORITY\t\t");
+	cprintfpad("NICE",FIELDSIZE);
+	cprintfpad("RUNTIME/WEIGHT",FIELDSIZE);
+	cprintfpad("RUNTIME",FIELDSIZE);
+	cprintfpad("VRUNTIME",FIELDSIZE);
+	cprintf("TOTAL TICKS %d\n",totalticks);
 	cprintf("\n");
 }
 void printcontent(struct proc* p){
-	cprintfpad(p->name,FIELDSIZE);
-	cprintf("%d\t\t",p->pid);
-	char strstate[10];
+	char strpid[FIELDSIZE],
+		strstate[FIELDSIZE],
+		strnice[FIELDSIZE],
+		strroverw[FIELDSIZE],
+		strruntime[FIELDSIZE],
+		strvruntime[FIELDSIZE];
+	
+	strint(p->pid,strpid);
 	strprocstate(strstate,p->state);
+	strint(p->schedstate.nice,strnice);
+	strint(p->schedstate.runtime/weights[p->schedstate.nice],strroverw);
+	strint(p->schedstate.runtime,strruntime);
+	strint(p->schedstate.vruntime,strvruntime);
+
+	cprintfpad(p->name,FIELDSIZE);
+	cprintfpad(strpid,FIELDSIZE);
 	cprintfpad(strstate,FIELDSIZE);
-	cprintf("%d\t\t",p->nice);
+	cprintfpad(strnice,FIELDSIZE);
+	cprintfpad(strroverw,FIELDSIZE);
+	cprintfpad(strruntime,FIELDSIZE);
+	cprintfpad(strvruntime,FIELDSIZE);
 	cprintf("\n");
 }
 

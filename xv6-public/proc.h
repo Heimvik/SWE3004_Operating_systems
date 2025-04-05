@@ -34,6 +34,13 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+struct cfsstate {
+  int nice;                         // Niceness of process (range 0-39, default 20)
+  int timeslice;                    // Timeslice of process [mticks] (max is 682 so int is fine here)
+  long long unsigned int runtime;   // Total runtime of process [mticks]
+  long long unsigned int vruntime;  // Total virtual runtime of process [mticks]
+};
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -41,7 +48,7 @@ struct proc {
   char *kstack;                // Bottom of kernel stack for this process
   enum procstate state;        // Process state
   int pid;                     // Process ID
-  int nice;	     	             // Niceness of process (range 0-39, default 20)
+  struct cfsstate schedstate; // Scheduling information
   struct proc *parent;         // Parent process
   struct trapframe *tf;        // Trap frame for current syscall
   struct context *context;     // swtch() here to run process
@@ -60,5 +67,4 @@ struct proc {
 
 
 //ps related defines
-#define FIELDSIZE 19+1 //19 for chars+1 for delimiter
-#define NFIELDS 4
+#define FIELDSIZE 15
