@@ -40,7 +40,7 @@ int calcvruntime(int runtime,int nice){
 	if(nice < 0 || nice > 39){
 		panic("Invalid nice value");
 	}
-	cprintf("Calculating vruntime for %d with nice %d, result: %d\n",runtime,nice,(runtime * weights[DEAFULT_NICE]) / weights[nice]);
+	//cprintf("Calculating vruntime for %d with nice %d, result: %d\n",runtime,nice,(runtime * weights[DEAFULT_NICE]) / weights[nice]);
 	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
 }
 int calctimeslice(int nice){
@@ -428,6 +428,7 @@ yield(void)
   p->state = RUNNABLE;
   p->schedstate.runtime += MTICKS;
   p->schedstate.vruntime += calcvruntime(MTICKS,p->schedstate.nice);
+  cprintf("Yielding process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
   sched();
   release(&ptable.lock);
 }
@@ -519,12 +520,13 @@ wakeup1(void *chan)
 	if(sleepingprocfound){
 		p->state = RUNNABLE;
 		if(!runnableprocfound){
-			cprintf("Waking up process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
 			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
+			cprintf("Wakeup did minvruntime %d - vruntime of %d\n",minvruntime,calcvruntime(MTICKS,p->schedstate.nice));
+			cprintf("Runnable, pid %d with result vruntime %d\n",p->pid,p->schedstate.vruntime);
 		} else {
 			//How tf does this makes sence? Others can be sleeping, and this would go to 0, making the othes vruntime way larger than this on 
-			cprintf("Waking up process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
 			p->schedstate.vruntime = 0;
+			cprintf("None runnable, %d with result vruntime %d\n",p->pid,p->schedstate.vruntime);
 		}
 	}
 }
