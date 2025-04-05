@@ -512,6 +512,7 @@ wakeup1(void *chan)
   	}
 	if(processfound){
 		p->state = RUNNABLE;
+		cprintf(".%d",minvruntime);
 		p->schedstate.vruntime += minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
 	}
 }
