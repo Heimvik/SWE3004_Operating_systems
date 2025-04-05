@@ -33,7 +33,13 @@ void testsyscalls(){
 	printf(1,"DONE\n");
 }
 
+void testsched(){
+	ps(0);
+	printf(1,"DONE\n");
+}
+
 int main(int argc, char *argv[]){
-    testsyscalls();
+    //testsyscalls();
+	testsched();
     exit();
 }

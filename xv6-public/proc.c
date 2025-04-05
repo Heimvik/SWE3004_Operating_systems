@@ -425,7 +425,7 @@ yield(void)
   struct proc *p = myproc();
   p->state = RUNNABLE;
   p->schedstate.runtime += MTICKS;
-  p->schedstate.vruntime = calcvruntime(p->schedstate.runtime,p->schedstate.nice); //This could be done ONCE in the scheduler
+  p->schedstate.vruntime += calcvruntime(MTICKS,p->schedstate.nice); //This could be done ONCE in the scheduler
   sched();
   release(&ptable.lock);
 }
@@ -498,7 +498,7 @@ wakeup1(void *chan)
 {
 	struct proc *p;
 	int processfound = 0;
-	unsigned int minvruntime = 0xFFFFFFFF; //Start at max value
+	unsigned int minvruntime = 0xFFFFFFFF;
 
 	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
 		//TODO: If there is no process in the RUNNABLE state when a process wakes up, you can set the vruntime of the process to be woken up to “0”)
@@ -512,7 +512,6 @@ wakeup1(void *chan)
   	}
 	if(processfound){
 		p->state = RUNNABLE;
-		p->schedstate.runtime = 1; //TODO: CHANGE THIS!
 		p->schedstate.vruntime += minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
 	}
 }
