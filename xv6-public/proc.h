@@ -41,6 +41,8 @@ struct cfsstate {
   unsigned int vruntime;      // Total virtual runtime of process [mticks]
 };
 
+#define DEAFULT_NICE 20
+#define MTICKS 1000
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)

@@ -50,13 +50,14 @@ For the sake of our implementation, we must consider the following:
 - Update ps correctly
 
 As the CFS scheduler relies on global state, these need to be maintained correctly through all process state changes. The `timeslice` will be maintained in the `scheduler()`, but the `weight`, `vruntime` and `runtime` must be maintained different places to cover all cases.  How and where we are modifying the global state changes to enusre correct operation in all cases, is shown below.
+- When process `init()`'d: This is the first process that is created and the scheduler will be initialized. Make sure it receives the default niceness of 20 and init it others to 0 to prepare it for 1, timeslice calc and 2 vruntime calc.
 - When process `fork()`'d: This is the default initialization of a new process. Child process `c` inherits runtime, vruntime and nice of parent `p`. This is done in `fork()` in `proc.c` as follows:
 ```C
 c->runtime = p->runtime
 c->vruntime = p->vruntime
 c->weight = p->weight
 ```
-- When process `yield()`: This happens every time tick and called from trap.c. Here `runtime` needs to be incremented and `vruntime` of the process updated based on this. This is done in `yield()` in `proc.c` as follows:
+- When process `yield()`: This happens every time tick and called from trap.c. Here `runtime` needs to be incremented. Update of `vruntime` bassed of `runtime` is done in `scheduler()` at the end to save computation. This is done in `yield()` in `proc.c` as follows:
 ```C
 p->vruntime += calcvruntime(1, p->weight);
 ```
@@ -67,6 +68,6 @@ p->vruntime = minvruntime - calcvruntime(1, p->weight);
 - When process `kill()`'d: THere seems to be no way back from this state, no reviving possible. Thus, no update of global state is needed as it exits in any case.
 - When process `exit()`'d: Nothing, it will never be run again.
 
-The `sched()` to the newly woken process is not included in the `wakeup()`, but this is the default implementation. This makes sence as well, the wakeup does and should to is to make the process **avalibale** for the `scheduler()`. It shouldn't force anything to happen. If we want thew woken up process to be run more recently after wakeup, give it higher priority then. 
+Each time we create a new process above, make sure all schedstate varaibles are correctly initialized. The `sched()` to the newly woken process is not included in the `wakeup()`, but this is the default implementation. This makes sence as well, the wakeup does and should to is to make the process **avalibale** for the `scheduler()`. It shouldn't force anything to happen. If we want thew woken up process to be run more recently after wakeup, give it higher priority then. 
 
 Also, wwe are here incrementing the `vruntime` of the process that is yielding at each timestep, which adds computational overhead.

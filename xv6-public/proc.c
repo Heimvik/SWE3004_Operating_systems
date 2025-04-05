@@ -14,10 +14,13 @@ struct {
 
 static struct proc *initproc;
 
+
+
+
 static const int weights[40] = {
-  88818,     71054,     56843,     45475,     36380,
-  29104,     23283,     18626,     14901,     11921,
-  9537,     7629,     6104,     4883,     3906,
+	88818,     71054,     56843,     45475,     36380,
+	29104,     23283,     18626,     14901,     11921,
+	9537,     7629,     6104,     4883,     3906,
   3125,     2500,     2000,     1600,     1280,
   1024,     819,     655,     524,     419,
   336,     268,     215,     172,     137,
@@ -32,6 +35,17 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
+
+int calcvruntime(int runtime,int nice){
+	if(nice < 0 || nice > 39){
+		return -1;
+	}
+	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
+}
+int calctimeslice(int nice){
+	return 1;
+}
+
 
 void
 pinit(void)
@@ -159,9 +173,13 @@ userinit(void)
   // run this process. the acquire forces the above
   // writes to be visible, and the lock is also needed
   // because the assignment might not be atomic.
-  acquire(&ptable.lock);
+  acquire(&ptable.lock); 
 
   p->state = RUNNABLE;
+  p->schedstate.nice = DEAFULT_NICE;
+  p->schedstate.runtime = 0;
+  p->schedstate.vruntime = 0;
+  p->schedstate.timeslice = 0;
 
   release(&ptable.lock);
 }
@@ -228,6 +246,10 @@ fork(void)
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
+  np->schedstate.nice = curproc->schedstate.nice;
+  np->schedstate.runtime = curproc->schedstate.runtime;
+  np->schedstate.vruntime = curproc->schedstate.vruntime;
+  np->schedstate.timeslice = curproc->schedstate.timeslice;
 
   release(&ptable.lock);
 
@@ -400,7 +422,10 @@ void
 yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
-  myproc()->state = RUNNABLE;
+  struct proc *p = myproc();
+  p->state = RUNNABLE;
+  p->schedstate.runtime += MTICKS;
+  p->schedstate.vruntime = calcvruntime(p->schedstate.runtime,p->schedstate.nice); //This could be done ONCE in the scheduler
   sched();
   release(&ptable.lock);
 }
@@ -471,11 +496,25 @@ sleep(void *chan, struct spinlock *lk)
 static void
 wakeup1(void *chan)
 {
-  struct proc *p;
+	struct proc *p;
+	int processfound = 0;
+	unsigned int minvruntime = 0xFFFFFFFF; //Start at max value
 
-  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
-      p->state = RUNNABLE;
+	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
+		//TODO: If there is no process in the RUNNABLE state when a process wakes up, you can set the vruntime of the process to be woken up to “0”)
+		if(iterp->state == SLEEPING && p->chan == chan){
+			processfound = 1;
+			p = iterp; //This is the process we want to wake up
+		}
+		if(iterp->schedstate.vruntime < minvruntime){
+			minvruntime = iterp->schedstate.vruntime;
+		}
+  	}
+	if(processfound){
+		p->state = RUNNABLE;
+		p->schedstate.runtime = 1; //TODO: CHANGE THIS!
+		p->schedstate.vruntime += minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
+	}
 }
 
 // Wake up all processes sleeping on chan.
@@ -723,3 +762,4 @@ void ps(int pid){
 	}
 	release(&ptable.lock);
 }
+
