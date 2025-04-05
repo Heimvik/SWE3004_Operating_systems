@@ -596,7 +596,7 @@ procdump(void)
     cprintf("\n");
   }
 }
-
+ 
 /*
 Syscall setnice(int pid, int nice) shold have properties:
 Input:
