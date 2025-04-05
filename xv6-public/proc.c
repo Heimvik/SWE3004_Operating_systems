@@ -364,7 +364,7 @@ scheduler(void)
   c->proc = 0;
   
   for(;;){
-	totalticks+= 1000;
+	totalticks+= MTICKS;
     // Enable interrupts on this processor.
     sti();
 
@@ -428,7 +428,7 @@ yield(void)
   p->state = RUNNABLE;
   p->schedstate.runtime += MTICKS;
   p->schedstate.vruntime += calcvruntime(MTICKS,p->schedstate.nice);
-  cprintf("Yielding process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
+  //cprintf("Yielding process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
   sched();
   release(&ptable.lock);
 }
@@ -512,7 +512,6 @@ wakeup1(void *chan)
 		}
 		if(iterp->state == RUNNABLE){
 			runnableprocfound = 1;
-			cprintf("Iterating over pid %d vruntime %d",iterp->pid,iterp->schedstate.vruntime);
 			if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0){
 				minvruntime = iterp->schedstate.vruntime;
 			}
@@ -522,12 +521,9 @@ wakeup1(void *chan)
 		p->state = RUNNABLE;
 		if(runnableprocfound){
 			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
-			cprintf("Wakeup did minvruntime %d - vruntime %d\n",minvruntime,calcvruntime(MTICKS,p->schedstate.nice));
-			cprintf("Runnable, pid %d with result vruntime %d\n",p->pid,p->schedstate.vruntime);
 		} else {
-			//How tf does this makes sence? Others can be sleeping, and this would go to 0, making the othes vruntime way larger than this on 
 			p->schedstate.vruntime = 0;
-			cprintf("None runnable, %d with result vruntime %d\n",p->pid,p->schedstate.vruntime);
+			//How tf does this makes sence? Others can be sleeping, and this would go to 0, making the othes vruntime way larger than this on 
 		}
 	}
 }
