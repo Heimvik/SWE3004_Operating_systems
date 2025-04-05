@@ -520,7 +520,7 @@ wakeup1(void *chan)
 			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
 		} else {
 			//How tf does tihs makes sence?
-			p->schedstate.vruntime = 0;
+			//p->schedstate.vruntime = 0;
 		}
 	}
 }
@@ -735,6 +735,7 @@ void printcontent(struct proc* p){
 	cprintfpad(strroverw,FIELDSIZE);
 	cprintfpad(strruntime,FIELDSIZE);
 	cprintfpad(strvruntime,FIELDSIZE);
+	cprintf("%d\n",p->schedstate.vruntime);
 	cprintf("\n");
 }
 
