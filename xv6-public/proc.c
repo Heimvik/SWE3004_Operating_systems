@@ -502,7 +502,7 @@ wakeup1(void *chan)
 	struct proc *p;
 	int sleepingprocfound = 0;
 	int runnableprocfound = 0;
-	unsigned int minvruntime = 0xFFFFFFFF;
+	int minvruntime = 0xFFFFFFFF;
 
 	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
 		//TODO: If there is no process in the RUNNABLE state when a process wakes up, you can set the vruntime of the process to be woken up to “0”)
