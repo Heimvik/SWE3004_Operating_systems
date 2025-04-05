@@ -720,6 +720,8 @@ void printcontent(struct proc* p){
 		strroverw[FIELDSIZE],
 		strruntime[FIELDSIZE],
 		strvruntime[FIELDSIZE];
+		
+	cprintf("|%d|",p->schedstate.vruntime);
 	
 	strint(p->pid,strpid);
 	strprocstate(strstate,p->state);
@@ -735,7 +737,6 @@ void printcontent(struct proc* p){
 	cprintfpad(strroverw,FIELDSIZE);
 	cprintfpad(strruntime,FIELDSIZE);
 	cprintfpad(strvruntime,FIELDSIZE);
-	cprintf("|%d|",p->schedstate.vruntime);
 	cprintf("\n");
 }
 
