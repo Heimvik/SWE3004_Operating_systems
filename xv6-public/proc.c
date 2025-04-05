@@ -44,7 +44,13 @@ int calcvruntime(int runtime,int nice){
 	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
 }
 int calctimeslice(int nice){
-	return 1;
+	int weightsum = 0;
+	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
+		if(iterp->state == RUNNABLE){
+			weightsum += weights[iterp->schedstate.nice];
+		}
+	}
+	return SCHED_LATENCY + weights[nice]/weightsum;
 }
 
 
@@ -387,6 +393,43 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
+    }
+    release(&ptable.lock);
+
+  }
+}
+
+void
+cfsscheduler(void)
+{
+  struct proc *p;
+  struct cpu *c = mycpu();
+  c->proc = 0;
+  
+  for(;;){
+	totalticks+= MTICKS;
+    // Enable interrupts on this processor.
+    sti();
+
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
+
+	int minvruntime = 0x7FFFFFFF; //Set to max value
+    for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
+    	if(minvruntime > iterp->schedstate.vruntime && iterp->schedstate.vruntime > 0 && iterp->state == RUNNABLE){
+			minvruntime = iterp->schedstate.vruntime;
+			p = iterp; //This is the process we want to run if it is still here in the end
+		}
+		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
+
+		c->proc = p;
+      	switchuvm(p);
+      	p->state = RUNNING;		
+		while(p->schedstate.timeslice > p->schedstate.runtime){
+			swtch(&(c->scheduler), p->context);
+		}
+		switchkvm();
+	    c->proc = 0;
     }
     release(&ptable.lock);
 

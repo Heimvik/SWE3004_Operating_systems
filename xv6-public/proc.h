@@ -43,6 +43,7 @@ struct cfsstate {
 
 #define DEAFULT_NICE 20
 #define MTICKS 1000
+#define SCHED_LATENCY 10*MTICKS
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
