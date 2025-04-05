@@ -40,6 +40,7 @@ int calcvruntime(int runtime,int nice){
 	if(nice < 0 || nice > 39){
 		panic("Invalid nice value");
 	}
+	cprintf("Calculating vruntime for %d with nice %d, result: %d\n",runtime,nice,(runtime * weights[DEAFULT_NICE]) / weights[nice]);
 	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
 }
 int calctimeslice(int nice){
@@ -249,6 +250,7 @@ fork(void)
   np->schedstate.nice = curproc->schedstate.nice;
   np->schedstate.runtime = curproc->schedstate.runtime;
   np->schedstate.vruntime = curproc->schedstate.vruntime;
+  cprintf("Forking process %d with vruntime %d\n",np->pid,np->schedstate.vruntime);
   np->schedstate.timeslice = curproc->schedstate.timeslice;
 
   release(&ptable.lock);
