@@ -721,8 +721,7 @@ void printcontent(struct proc* p){
 		strruntime[FIELDSIZE],
 		strvruntime[FIELDSIZE];
 		
-	cprintf("|%d|",p->schedstate.vruntime);
-	
+		
 	strint(p->pid,strpid);
 	strprocstate(strstate,p->state);
 	strint(p->schedstate.nice,strnice);
