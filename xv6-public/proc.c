@@ -425,7 +425,7 @@ yield(void)
   struct proc *p = myproc();
   p->state = RUNNABLE;
   p->schedstate.runtime += MTICKS;
-  p->schedstate.vruntime += calcvruntime(MTICKS,p->schedstate.nice); //This could be done ONCE in the scheduler
+  p->schedstate.vruntime += calcvruntime(MTICKS,p->schedstate.nice);
   sched();
   release(&ptable.lock);
 }
@@ -517,10 +517,12 @@ wakeup1(void *chan)
 	if(sleepingprocfound){
 		p->state = RUNNABLE;
 		if(!runnableprocfound){
-			p->schedstate.vruntime = minvruntime;//-calcvruntime(MTICKS,p->schedstate.nice);
+			cprintf("Waking up process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
+			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
 		} else {
-			//How tf does tihs makes sence?
-			//p->schedstate.vruntime = 0;
+			//How tf does this makes sence? Others can be sleeping, and this would go to 0, making the othes vruntime way larger than this on 
+			cprintf("Waking up process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
+			p->schedstate.vruntime = 0;
 		}
 	}
 }
