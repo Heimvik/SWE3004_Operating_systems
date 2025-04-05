@@ -38,7 +38,7 @@ static void wakeup1(void *chan);
 
 int calcvruntime(int runtime,int nice){
 	if(nice < 0 || nice > 39){
-		return -1;
+		panic("Invalid nice value");
 	}
 	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
 }
