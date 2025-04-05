@@ -502,7 +502,7 @@ wakeup1(void *chan)
 	struct proc *p;
 	int sleepingprocfound = 0;
 	int runnableprocfound = 0;
-	int minvruntime = 0x0FFFFFFF; //Set to max value
+	int minvruntime = 0x7FFFFFFF; //Set to max value
 
 	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
 		//TODO: If there is no process in the RUNNABLE state when a process wakes up, you can set the vruntime of the process to be woken up to “0”)
@@ -512,6 +512,7 @@ wakeup1(void *chan)
 		}
 		if(iterp->state == RUNNABLE){
 			runnableprocfound = 1;
+			cprintf("Iterating over pid %d vruntime %d",iterp->pid,iterp->schedstate.vruntime);
 			if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0){
 				minvruntime = iterp->schedstate.vruntime;
 			}
@@ -519,7 +520,7 @@ wakeup1(void *chan)
   	}
 	if(sleepingprocfound){
 		p->state = RUNNABLE;
-		if(!runnableprocfound){
+		if(runnableprocfound){
 			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
 			cprintf("Wakeup did minvruntime %d - vruntime %d\n",minvruntime,calcvruntime(MTICKS,p->schedstate.nice));
 			cprintf("Runnable, pid %d with result vruntime %d\n",p->pid,p->schedstate.vruntime);
