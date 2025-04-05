@@ -37,8 +37,8 @@ enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 struct cfsstate {
   int nice;                   // Niceness of process (range 0-39, default 20)
   int timeslice;              // Timeslice of process [mticks] (max is 682 so int is fine here)
-  unsigned int runtime;       // Total runtime of process [mticks]
-  unsigned int vruntime;      // Total virtual runtime of process [mticks]
+  int runtime;       // Total runtime of process [mticks]
+  int vruntime;      // Total virtual runtime of process [mticks]
 };
 
 #define DEAFULT_NICE 20
