@@ -517,7 +517,7 @@ wakeup1(void *chan)
 	if(sleepingprocfound){
 		p->state = RUNNABLE;
 		if(!runnableprocfound){
-			p->schedstate.vruntime += minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
+			p->schedstate.vruntime += minvruntime;//-calcvruntime(MTICKS,p->schedstate.nice);
 		} else {
 			//How tf does tihs makes sence?
 			p->schedstate.vruntime = 0;
