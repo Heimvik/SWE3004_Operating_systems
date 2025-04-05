@@ -512,7 +512,7 @@ wakeup1(void *chan)
 		}
 		if(iterp->state == RUNNABLE){
 			runnableprocfound = 1;
-			if(iterp->schedstate.vruntime < minvruntime){
+			if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0){
 				minvruntime = iterp->schedstate.vruntime;
 			}
 		}
@@ -521,7 +521,7 @@ wakeup1(void *chan)
 		p->state = RUNNABLE;
 		if(!runnableprocfound){
 			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
-			cprintf("Wakeup did minvruntime %d - vruntime of %d\n",minvruntime,calcvruntime(MTICKS,p->schedstate.nice));
+			cprintf("Wakeup did minvruntime %d - vruntime %d\n",minvruntime,calcvruntime(MTICKS,p->schedstate.nice));
 			cprintf("Runnable, pid %d with result vruntime %d\n",p->pid,p->schedstate.vruntime);
 		} else {
 			//How tf does this makes sence? Others can be sleeping, and this would go to 0, making the othes vruntime way larger than this on 
