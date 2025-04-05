@@ -48,6 +48,7 @@ The CFS scheduler will then schedule the processes as follows:
 For the sake of our implementation, we must consider the following:
 - Each process that is running, will be interrupted each timer tick (each time the timer interrupt is called) and execution will end up in `scheduler()` with its context. Implement the scheduler algorithm here.
 - Update ps correctly
+
 As the CFS scheduler relies on global state, these need to be maintained correctly through all process state changes. The `timeslice` will be maintained in the `scheduler()`, but the `weight`, `vruntime` and `runtime` must be maintained different places to cover all cases.  How and where we are modifying the global state changes to enusre correct operation in all cases, is shown below.
 - When process `fork()`'d: This is the default initialization of a new process. Child process `c` inherits runtime, vruntime and nice of parent `p`. This is done in `fork()` in `proc.c` as follows:
 ```C
