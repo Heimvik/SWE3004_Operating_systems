@@ -497,23 +497,31 @@ static void
 wakeup1(void *chan)
 {
 	struct proc *p;
-	int processfound = 0;
+	int sleepingprocfound = 0;
+	int runnableprocfound = 0;
 	unsigned int minvruntime = 0xFFFFFFFF;
 
 	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
 		//TODO: If there is no process in the RUNNABLE state when a process wakes up, you can set the vruntime of the process to be woken up to “0”)
 		if(iterp->state == SLEEPING && iterp->chan == chan){
-			processfound = 1;
+			sleepingprocfound = 1;
 			p = iterp; //This is the process we want to wake up
 		}
-		if(iterp->state == RUNNABLE && iterp->schedstate.vruntime < minvruntime){
-			minvruntime = iterp->schedstate.vruntime;
+		if(iterp->state == RUNNABLE){
+			runnableprocfound = 1;
+			if(iterp->schedstate.vruntime < minvruntime){
+				minvruntime = iterp->schedstate.vruntime;
+			}
 		}
   	}
-	if(processfound){
+	if(sleepingprocfound){
 		p->state = RUNNABLE;
-		cprintf(".%d",minvruntime);
-		p->schedstate.vruntime += minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
+		if(!runnableprocfound){
+			p->schedstate.vruntime += minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
+		} else {
+			//How tf does tihs makes sence?
+			p->schedstate.vruntime = 0;
+		}
 	}
 }
 
