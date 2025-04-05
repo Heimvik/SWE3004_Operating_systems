@@ -506,7 +506,7 @@ wakeup1(void *chan)
 			processfound = 1;
 			p = iterp; //This is the process we want to wake up
 		}
-		if(iterp->schedstate.vruntime < minvruntime){
+		if(iterp->state == RUNNABLE && iterp->schedstate.vruntime < minvruntime){
 			minvruntime = iterp->schedstate.vruntime;
 		}
   	}
