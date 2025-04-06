@@ -330,6 +330,10 @@ wait(void)
         p->name[0] = 0;
         p->killed = 0;
         p->state = UNUSED;
+		p->schedstate.nice = 20;
+		p->schedstate.runtime = 0;
+		p->schedstate.vruntime = 0;
+		p->schedstate.timeslice = 0;
         release(&ptable.lock);
         return pid;
       }
