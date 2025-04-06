@@ -828,28 +828,40 @@ void printvariabletable(struct proc* ptable){
 
 void printgantline(struct proc* ptable) {
     static int firstprint = 1;
-    static int printedpids[NPROC] = {0}; // NB static! -> its value is preserved between calls
+    static int printedpids[NPROC] = {0};
     
     if (firstprint) {
         for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
-            if(p->pid != 0) {
-                char strpid[GANTFIELDSIZE/2],strnice[GANTFIELDSIZE/2];
-                if (!printedpids[p->pid]) {
-                    strint(p->pid, strpid);
-					strint(p->schedstate.nice, strnice);
-                    cprintfpad(strpid, GANTFIELDSIZE/2);
-                    cprintfpad(strnice, GANTFIELDSIZE/2);
-                    printedpids[p->pid] = 1;
-                } else {
-                    cprintfpad("", GANTFIELDSIZE);
+            if(p->pid != 0 && !printedpids[p->pid]) {
+                char pidstr[8];
+                char nicestr[4];
+                char combined[GANTFIELDSIZE] = {0};
+                
+                strint(p->pid, pidstr);
+                strint(p->schedstate.nice, nicestr);
+                
+                int pos = 0;
+                for(int i = 0; pidstr[i] && pos < GANTFIELDSIZE-1; i++) {
+                    combined[pos++] = pidstr[i];
                 }
+                if(pos < GANTFIELDSIZE-1) combined[pos++] = '(';
+                for(int i = 0; nicestr[i] && pos < GANTFIELDSIZE-1; i++) {
+                    combined[pos++] = nicestr[i];
+                }
+                if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
+                combined[pos] = '\0';
+                
+                cprintfpad(combined, GANTFIELDSIZE);
+                printedpids[p->pid] = 1;
+            } else if (p->pid != 0) {
+                cprintfpad("", GANTFIELDSIZE);
             }
         }
         cprintf("\n");
         firstprint = 0;
     }
     
-    // Second pass: print the state symbols
+    // Print state symbols
     for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
         if(p->pid != 0) {
             if(p->state == RUNNABLE) {
@@ -859,7 +871,7 @@ void printgantline(struct proc* ptable) {
             } else if(p->state == RUNNING) {
                 cprintfpad("#", GANTFIELDSIZE);
             } else if(p->state == ZOMBIE) {
-                cprintfpad("Z", GANTFIELDSIZE); // Changed to uppercase to distinguish from SLEEPING
+                cprintfpad("Z", GANTFIELDSIZE);
             } else {
                 cprintfpad(".", GANTFIELDSIZE);
             }
