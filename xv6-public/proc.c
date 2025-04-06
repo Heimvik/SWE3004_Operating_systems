@@ -14,8 +14,8 @@ struct {
 
 static struct proc *initproc;
 
-void printvisualheader(struct proc* ptable);
-void printvisualline(struct proc* ptable);
+void printvariabletable(struct proc* ptable);
+void printgantline(struct proc* ptable);
 
 
 
@@ -388,8 +388,8 @@ scheduler(void)
 		c->proc = p;
 		switchuvm(p);  //Switche to the process's page table (each page table is spesific to a process)
 		p->state = RUNNING;
-		printvisualheader(ptable.proc);
-		printvisualline(ptable.proc);
+		//printvariabletable(ptable.proc);
+		printgantline(ptable.proc);
 		swtch(&(c->scheduler), p->context);
 		switchkvm();
 
@@ -788,7 +788,36 @@ void printcontent(struct proc* p){
 	cprintf("\n");
 }
 
-void printvisualheader(struct proc* ptable){
+void printvariabletable(struct proc* ptable){
+	cprintfpad("PID",FIELDSIZE);
+	cprintfpad("NICE",FIELDSIZE);
+	cprintfpad("TIMESLICE",FIELDSIZE);
+	cprintfpad("RUNTIME",FIELDSIZE);
+	cprintfpad("VRUNTIME",FIELDSIZE);
+	cprintf("\n");
+	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
+		if(p->pid != 0){
+			char strpid[FIELDSIZE],
+			strnice[FIELDSIZE],
+			strtimeslice[FIELDSIZE],
+			strruntime[FIELDSIZE],
+			strvruntime[FIELDSIZE];
+			strint(p->pid,strpid);
+			strint(p->schedstate.nice,strnice);
+			strint(p->schedstate.timeslice,strtimeslice);
+			strint(p->schedstate.runtime,strruntime);
+			strint(p->schedstate.vruntime,strvruntime);
+			cprintfpad(strpid,FIELDSIZE);
+			cprintfpad(strnice,FIELDSIZE);
+			cprintfpad(strtimeslice,FIELDSIZE);
+			cprintfpad(strruntime,FIELDSIZE);
+			cprintfpad(strvruntime,FIELDSIZE);
+			cprintf("\n");
+		}
+	}
+}
+
+void printgantline(struct proc* ptable){
 	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
 		if(p->pid != 0){
 			char strpid[GANTFIELDSIZE];
@@ -796,19 +825,7 @@ void printvisualheader(struct proc* ptable){
 			cprintfpad(strpid,GANTFIELDSIZE);
 		}
 	}
-	cprintf("\t|\t");
-	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
-		if(p->pid != 0){
-			cprintfpad("NICE",FIELDSIZE);
-			cprintfpad("TIMESLICE",FIELDSIZE);
-			cprintfpad("RUNTIME",FIELDSIZE);
-			cprintfpad("VRUNTIME",FIELDSIZE);
-		}
-	}
 	cprintf("\n");
-}
-
-void printvisualline(struct proc* ptable){
 	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
 		if(p->pid != 0){
 			if(p->state == RUNNABLE){
@@ -822,23 +839,6 @@ void printvisualline(struct proc* ptable){
 			} else {
 				cprintfpad("  .",GANTFIELDSIZE);
 			}
-		}
-	}
-	cprintf("\t|\t");
-	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
-		if(p->pid != 0){
-			char strnice[FIELDSIZE],
-			strtimeslice[FIELDSIZE],
-			strruntime[FIELDSIZE],
-			strvruntime[FIELDSIZE];
-			strint(p->schedstate.nice,strnice);
-			strint(p->schedstate.timeslice,strtimeslice);
-			strint(p->schedstate.runtime,strruntime);
-			strint(p->schedstate.vruntime,strvruntime);
-			cprintfpad(strnice,FIELDSIZE);
-			cprintfpad(strtimeslice,FIELDSIZE);
-			cprintfpad(strruntime,FIELDSIZE);
-			cprintfpad(strvruntime,FIELDSIZE);
 		}
 	}
 	cprintf("\n");
