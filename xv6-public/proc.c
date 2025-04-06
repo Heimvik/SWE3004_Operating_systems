@@ -14,6 +14,9 @@ struct {
 
 static struct proc *initproc;
 
+void printvisualheader(struct proc* ptable);
+void printvisualline(struct proc* ptable);
+
 
 
 
@@ -404,7 +407,7 @@ scheduler(void)
 void
 cfsscheduler(void)
 {
-  struct proc *p;
+  struct proc *p = ptable.proc;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -788,8 +791,6 @@ void printcontent(struct proc* p){
 }
 
 void printvisualheader(struct proc* ptable){
-	char* strprocstates[NPROC];
-	int index = 0;
 	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
 		if(p->pid != 0){
 			char strpid[GANTFIELDSIZE];
