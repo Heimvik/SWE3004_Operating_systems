@@ -877,7 +877,7 @@ void printgantline(struct proc* ptable) {
             }
         }
     }
-    cprintf("\n");
+    //cprintf("\n");
 }
 /*
 Funciton schedvisualizer is neccasary to verify funcitonality of the scheduler.
