@@ -46,20 +46,6 @@ int calcvruntime(int runtime,int nice){
 	//cprintf("Calculating vruntime for %d with nice %d, result: %d\n",runtime,nice,(runtime * weights[DEAFULT_NICE]) / weights[nice]);
 	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
 }
-int calctimeslice(int nice){
-	int weightsum = 0;
-	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
-		if(iterp->state == RUNNABLE){
-			weightsum += weights[iterp->schedstate.nice];
-		}
-	}
-	if(weightsum == 0){
-		panic("zero div");
-		weightsum = 1; //Avoid division by zero
-	}
-	return SCHED_LATENCY + weights[nice]/weightsum;
-}
-
 
 void
 pinit(void)
@@ -418,7 +404,6 @@ cfsscheduler(void)
 	c->proc = 0;
 	
 	for(;;){
-		
 		sti();
 		acquire(&ptable.lock);
 		
@@ -436,9 +421,6 @@ cfsscheduler(void)
 					minvruntime = iterp->schedstate.vruntime;
 					p = iterp; //This is the process we want to run if it is still here in the end
 				}
-				if(iterp->pid != 0){
-					cprintf("Iter proc %d\n",iterp->pid);
-				}
 			}
 		}
 		if(!runnableprocfound){
@@ -448,17 +430,15 @@ cfsscheduler(void)
 		totalticks+= MTICKS;
 		
 		//2. Calculate its timeslice
-		cprintf("Proc %d with nice %d\n",p->pid,p->schedstate.nice);
 		if(weightsum == 0){
 			panic("zero div");
 		}
 		p->schedstate.timeslice = SCHED_LATENCY + weights[p->schedstate.nice]/weightsum;
-		cprintf("Timeslice calc %d is %d\n",p->pid,p->schedstate.timeslice);
+
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;		
-		cprintf("Sched switch into %d\n",p->pid);
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
 		switchkvm();			//Switch back to the scheduler's page table
