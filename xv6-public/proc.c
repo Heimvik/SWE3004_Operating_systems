@@ -371,26 +371,24 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-  acquire(&ptable.lock);
-  printvisualheader(ptable.proc);
-  release(&ptable.lock);
   for(;;){
-	totalticks+= MTICKS;
-    // Enable interrupts on this processor.
-    sti();
-
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	  totalticks+= MTICKS;
+	  // Enable interrupts on this processor.
+	  sti();
+	  
+	  // Loop over process table looking for process to run.
+	  acquire(&ptable.lock);
+	  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state != RUNNABLE)
-			continue;
-
+		continue;
+		
 		// Switch to chosen process.  It is the process's job
 		// to release ptable.lock and then reacquire it
 		// before jumping back to us.
 		c->proc = p;
 		switchuvm(p);  //Switche to the process's page table (each page table is spesific to a process)
 		p->state = RUNNING;
+		printvisualheader(ptable.proc);
 		printvisualline(ptable.proc);
 		swtch(&(c->scheduler), p->context);
 		switchkvm();
@@ -808,12 +806,6 @@ void printvisualheader(struct proc* ptable){
 		}
 	}
 	cprintf("\n");
-	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
-		if(p->pid != 0){
-			cprintfpad(p->name,GANTFIELDSIZE);
-		}
-	}
-	cprintf("\t|\t");
 }
 
 void printvisualline(struct proc* ptable){
@@ -849,6 +841,7 @@ void printvisualline(struct proc* ptable){
 			cprintfpad(strvruntime,FIELDSIZE);
 		}
 	}
+	cprintf("\n");
 }
 /*
 Funciton schedvisualizer is neccasary to verify funcitonality of the scheduler.
