@@ -416,7 +416,6 @@ cfsscheduler(void)
 	release(&ptable.lock);
 	struct cpu *c = mycpu();
 	c->proc = 0;
-	int runnableprocfound = 0;
 	
 	for(;;){
 		
@@ -424,6 +423,7 @@ cfsscheduler(void)
 		acquire(&ptable.lock);
 		
 		//1. Find the one with the smallest vruntime from the RUNNABLE processes (this may preempt the current process, i.e. if another one wakes up with a smaller vruntime)
+		int runnableprocfound = 0;
 		int minvruntime = 0x7FFFFFFF; //Set to max value
 		int weightsum = 0;
 		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
@@ -443,7 +443,6 @@ cfsscheduler(void)
 		}
 		if(!runnableprocfound){
 			release(&ptable.lock);
-			runnableprocfound = 0;
 			continue;
 		}
 		totalticks+= MTICKS;
