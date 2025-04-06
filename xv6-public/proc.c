@@ -413,12 +413,12 @@ cfsscheduler(void)
 	struct cpu *c = mycpu();
 	c->proc = 0;
 	
-	while(1){
+	for(;;){
 		totalticks+= MTICKS;
-
+		
 		sti();
 		acquire(&ptable.lock);
-
+		
 		//1. Find the one with the smallest vruntime from the RUNNABLE processes (this may preempt the current process, i.e. if another one wakes up with a smaller vruntime)
 		int minvruntime = 0x7FFFFFFF; //Set to max value
 		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
@@ -428,7 +428,9 @@ cfsscheduler(void)
 			}
 		}
 		//2. Calculate its timeslice
+		cprintf("Running process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
 		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
+		cprintf("Timeslice calc\n");
 
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
