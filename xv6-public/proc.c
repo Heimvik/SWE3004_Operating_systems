@@ -388,8 +388,8 @@ scheduler(void)
 		c->proc = p;
 		switchuvm(p);  //Switche to the process's page table (each page table is spesific to a process)
 		p->state = RUNNING;
-		//printvariabletable(ptable.proc);
-		printgantline(ptable.proc);
+		printvariabletable(ptable.proc);
+		//printgantline(ptable.proc);
 		swtch(&(c->scheduler), p->context);
 		switchkvm();
 
