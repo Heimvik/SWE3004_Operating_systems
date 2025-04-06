@@ -372,7 +372,6 @@ rrscheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   for(;;){
-	  totalticks+= MTICKS;
 	  // Enable interrupts on this processor.
 	  sti();
 	  
@@ -380,8 +379,8 @@ rrscheduler(void)
 	  acquire(&ptable.lock);
 	  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 		if(p->state != RUNNABLE)
-		continue;
-		
+			continue;
+			
 		// Switch to chosen process.  It is the process's job
 		// to release ptable.lock and then reacquire it
 		// before jumping back to us.
@@ -390,7 +389,10 @@ rrscheduler(void)
 		p->state = RUNNING;
 		//printvariabletable(ptable.proc);
 		//printgantline(ptable.proc);
+		
 		swtch(&(c->scheduler), p->context);
+		totalticks+= MTICKS;
+
 		switchkvm();
 
 		// Process is done running for now.
@@ -405,37 +407,39 @@ rrscheduler(void)
 void
 cfsscheduler(void)
 {
-  struct proc *p = ptable.proc; //Start with the fist one by default
-  struct cpu *c = mycpu();
-  c->proc = 0;
-  
-  while(1){
-	totalticks+= MTICKS;
-
-	sti();
 	acquire(&ptable.lock);
-
-	//1. Find the one with the smallest vruntime from the RUNNABLE processes (this may preempt the current process, i.e. if another one wakes up with a smaller vruntime)
-	int minvruntime = 0x7FFFFFFF; //Set to max value
-	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
-		if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0 && iterp->state == RUNNABLE){
-			minvruntime = iterp->schedstate.vruntime;
-			p = iterp; //This is the process we want to run if it is still here in the end
-		}
-	}
-	//2. Calculate its timeslice
-	p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
-
-	//3. Run it for this timeslice, unless preemted
-	c->proc = p;			//Assign the process to this CPU
-	switchuvm(p);			//Switch from the schedulers page table to the process's page table
-	p->state = RUNNING;		
-
-	swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
-
-	switchkvm();			//Switch back to the scheduler's page table
-	c->proc = 0;			//Unassign the process from this CPU
+	struct proc *p = ptable.proc; //Start with the fist one by default
 	release(&ptable.lock);
+	struct cpu *c = mycpu();
+	c->proc = 0;
+	
+	while(1){
+		totalticks+= MTICKS;
+
+		sti();
+		acquire(&ptable.lock);
+
+		//1. Find the one with the smallest vruntime from the RUNNABLE processes (this may preempt the current process, i.e. if another one wakes up with a smaller vruntime)
+		int minvruntime = 0x7FFFFFFF; //Set to max value
+		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
+			if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0 && iterp->state == RUNNABLE){
+				minvruntime = iterp->schedstate.vruntime;
+				p = iterp; //This is the process we want to run if it is still here in the end
+			}
+		}
+		//2. Calculate its timeslice
+		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
+
+		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
+		c->proc = p;			//Assign the process to this CPU
+		switchuvm(p);			//Switch from the schedulers page table to the process's page table
+		p->state = RUNNING;		
+
+		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
+
+		switchkvm();			//Switch back to the scheduler's page table
+		c->proc = 0;			//Unassign the process from this CPU
+		release(&ptable.lock);
 	}
 }
 
