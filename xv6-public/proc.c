@@ -419,7 +419,6 @@ cfsscheduler(void)
 	int runnableprocfound = 0;
 	
 	for(;;){
-		totalticks+= MTICKS;
 		
 		sti();
 		acquire(&ptable.lock);
@@ -444,8 +443,11 @@ cfsscheduler(void)
 		}
 		if(!runnableprocfound){
 			release(&ptable.lock);
+			runnableprocfound = 0;
 			continue;
 		}
+		totalticks+= MTICKS;
+		
 		//2. Calculate its timeslice
 		cprintf("Proc %d with nice %d\n",p->pid,p->schedstate.nice);
 		if(weightsum == 0){
