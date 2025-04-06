@@ -826,31 +826,46 @@ void printvariabletable(struct proc* ptable){
 	}
 }
 
-void printgantline(struct proc* ptable){
-	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
-		if(p->pid != 0){
-			char strpid[GANTFIELDSIZE];
-			strint(p->pid,strpid);
-			//cprintfpad(strpid,GANTFIELDSIZE);
-		}
-	}
-	//cprintf("\n");
-	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
-		if(p->pid != 0){
-			if(p->state == RUNNABLE){
-				cprintfpad("r",GANTFIELDSIZE);
-			} else if(p->state == SLEEPING){
-				cprintfpad("z",GANTFIELDSIZE);
-			} else if(p->state == RUNNING){
-				cprintfpad("#",GANTFIELDSIZE);
-			} else if(p->state == ZOMBIE){
-				cprintfpad("z",GANTFIELDSIZE);
-			} else {
-				cprintfpad(".",GANTFIELDSIZE);
-			}
-		}
-	}
-	cprintf("\n");
+void printgantline(struct proc* ptable) {
+    static int first_print = 1;
+    static int printed_pids[NPROC] = {0}; // NB static! -> its value is preserved between calls
+    
+    if (first_print) {
+        for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+            if(p->pid != 0) {
+                char pid[GANTFIELDSIZE],nice[GANTFIELDSIZE];
+                if (!printed_pids[p->pid]) {
+                    strint(p->pid, pid);
+					strint(p->schedstate.nice, nice);
+                    cprintfpad(pid, GANTFIELDSIZE/2);
+                    cprintfpad(nice, GANTFIELDSIZE/2);
+                    printed_pids[p->pid] = 1;
+                } else {
+                    cprintfpad("", GANTFIELDSIZE);
+                }
+            }
+        }
+        cprintf("\n");
+        first_print = 0;
+    }
+    
+    // Second pass: print the state symbols
+    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+        if(p->pid != 0) {
+            if(p->state == RUNNABLE) {
+                cprintfpad("r", GANTFIELDSIZE);
+            } else if(p->state == SLEEPING) {
+                cprintfpad("z", GANTFIELDSIZE);
+            } else if(p->state == RUNNING) {
+                cprintfpad("#", GANTFIELDSIZE);
+            } else if(p->state == ZOMBIE) {
+                cprintfpad("Z", GANTFIELDSIZE); // Changed to uppercase to distinguish from SLEEPING
+            } else {
+                cprintfpad(".", GANTFIELDSIZE);
+            }
+        }
+    }
+    cprintf("\n");
 }
 /*
 Funciton schedvisualizer is neccasary to verify funcitonality of the scheduler.
