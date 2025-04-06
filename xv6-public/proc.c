@@ -413,15 +413,13 @@ cfsscheduler(void)
 		int weightsum = 0;
 		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
 			if(iterp->state == RUNNABLE){
-				cprintf("Runnable: %d\n",iterp->pid);
-				procdump();
 				runnableprocfound = 1;
 
 				if(iterp->schedstate.nice >= 0 && iterp->schedstate.nice <= 39){
 					weightsum += weights[iterp->schedstate.nice];
 				}
 				
-				if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0){
+				if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime >= 0){
 					cprintf("pid %d new minvr: %d\n",iterp->pid, iterp->schedstate.vruntime);
 					minvruntime = iterp->schedstate.vruntime;
 					p = iterp; //This is the process we want to run if it is still here in the end
