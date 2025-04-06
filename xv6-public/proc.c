@@ -825,14 +825,15 @@ void printvariabletable(struct proc* ptable){
 		}
 	}
 }
-
 void printgantline(struct proc* ptable) {
-    int firstprint = 1;
+    static int firstprint = 1;
     static int printedpids[NPROC] = {0};
+    static int lastnice[NPROC] = {0}; // Track last seen nice values
     
-    if (firstprint) {
-        for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
-            if(p->pid != 0 && !printedpids[p->pid]) {
+    // Print headers for new processes or those with changed nice values
+    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+        if(p->pid != 0) {
+            if(firstprint || !printedpids[p->pid] || lastnice[p->pid] != p->schedstate.nice) {
                 char pidstr[8];
                 char nicestr[4];
                 char combined[GANTFIELDSIZE] = {0};
@@ -851,31 +852,28 @@ void printgantline(struct proc* ptable) {
                 if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
                 combined[pos] = '\0';
                 
-                cprintfpad(combined,GANTFIELDSIZE);
+                cprintfpad(combined, GANTFIELDSIZE);
                 printedpids[p->pid] = 1;
+                lastnice[p->pid] = p->schedstate.nice;
+            } else {
+                // Print state symbol if no change
+                if(p->state == RUNNABLE) {
+                    cprintfpad("r", GANTFIELDSIZE);
+                } else if(p->state == SLEEPING) {
+                    cprintfpad("z", GANTFIELDSIZE);
+                } else if(p->state == RUNNING) {
+                    cprintfpad("#", GANTFIELDSIZE);
+                } else if(p->state == ZOMBIE) {
+                    cprintfpad("Z", GANTFIELDSIZE);
+                } else {
+                    cprintfpad(".", GANTFIELDSIZE);
+                }
             }
         }
-        cprintf("\n");
-        firstprint = 0;
     }
     
-    // Print state symbols
-    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
-        if(p->pid != 0) {
-            if(p->state == RUNNABLE) {
-                cprintfpad("r", GANTFIELDSIZE);
-            } else if(p->state == SLEEPING) {
-                cprintfpad("z", GANTFIELDSIZE);
-            } else if(p->state == RUNNING) {
-                cprintfpad("#", GANTFIELDSIZE);
-            } else if(p->state == ZOMBIE) {
-                cprintfpad("Z", GANTFIELDSIZE);
-            } else {
-                cprintfpad(".", GANTFIELDSIZE);
-            }
-        }
-    }
-    //cprintf("\n");
+    cprintf("\n");
+    firstprint = 0;
 }
 /*
 Funciton schedvisualizer is neccasary to verify funcitonality of the scheduler.
