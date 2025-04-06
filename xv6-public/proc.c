@@ -249,8 +249,8 @@ fork(void)
   np->schedstate.nice = curproc->schedstate.nice;
   np->schedstate.runtime = curproc->schedstate.runtime;
   np->schedstate.vruntime = curproc->schedstate.vruntime;
-  cprintf("Forking process %d with vruntime %d\n",np->pid,np->schedstate.vruntime);
   np->schedstate.timeslice = curproc->schedstate.timeslice;
+  cprintf("Forking out process %d\n",np->pid);
 
   release(&ptable.lock);
 
@@ -421,6 +421,9 @@ cfsscheduler(void)
 					minvruntime = iterp->schedstate.vruntime;
 					p = iterp; //This is the process we want to run if it is still here in the end
 				}
+			} else if(iterp->state == ZOMBIE){
+				procdump();
+				cprintf("A");
 			}
 		}
 		if(!runnableprocfound){
