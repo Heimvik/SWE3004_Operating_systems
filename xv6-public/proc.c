@@ -851,10 +851,8 @@ void printgantline(struct proc* ptable) {
                 if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
                 combined[pos] = '\0';
                 
-                cprintfpad(combined, GANTFIELDSIZE);
+                cprintf(combined);
                 printedpids[p->pid] = 1;
-            } else if (p->pid != 0) {
-                cprintfpad("", GANTFIELDSIZE);
             }
         }
         cprintf("\n");
