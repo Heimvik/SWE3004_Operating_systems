@@ -431,9 +431,9 @@ cfsscheduler(void)
 			}
 		}
 		//2. Calculate its timeslice
-		cprintf("Running process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
+		cprintf("Proc %d with nice %d\n",p->pid,p->schedstate.nice);
 		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
-
+		cprintf("Timeslice calc %d is %d\n",p->pid,p->schedstate.timeslice);
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
