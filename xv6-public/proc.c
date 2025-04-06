@@ -426,11 +426,13 @@ cfsscheduler(void)
 				minvruntime = iterp->schedstate.vruntime;
 				p = iterp; //This is the process we want to run if it is still here in the end
 			}
+			if(iterp->pid != 0){
+				cprintf("Iter proc %d\n",iterp->pid);
+			}
 		}
 		//2. Calculate its timeslice
 		cprintf("Running process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
 		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
-		cprintf("Timeslice calc\n");
 
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
