@@ -36,7 +36,7 @@ void testsyscalls(){
 void testsched(){
 	int pids[5];
 	int nicevalues[5] = {0, 10, 20, 30, 39};
-	int workload = 10000000; // Adjust workload as needed
+	int workload = 1000000000; // Adjust workload as needed
 	
 	for (int i = 0; i < 5; i++) {
 		pids[i] = fork();
@@ -44,6 +44,10 @@ void testsched(){
 			setnice(getpid(), nicevalues[i]);
 			printf(1, "PID %d | nice %d started.\n", getpid(), nicevalues[i]);
 			if(i == 4) {
+				int j = 0;
+				while(j != 1000){
+					j++;
+				}
 				ps(0);//Pids should be similar here
 			}
 			volatile int sum = 0;
