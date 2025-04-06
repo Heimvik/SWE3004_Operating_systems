@@ -827,7 +827,7 @@ void printvariabletable(struct proc* ptable){
 }
 
 void printgantline(struct proc* ptable) {
-    static int firstprint = 1;
+    int firstprint = 1;
     static int printedpids[NPROC] = {0};
     
     if (firstprint) {
