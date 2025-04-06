@@ -250,7 +250,6 @@ fork(void)
   np->schedstate.runtime = curproc->schedstate.runtime;
   np->schedstate.vruntime = curproc->schedstate.vruntime;
   np->schedstate.timeslice = curproc->schedstate.timeslice;
-  cprintf("Forking out process %d\n",np->pid);
 
   release(&ptable.lock);
 
@@ -426,11 +425,11 @@ cfsscheduler(void)
 			}
 		}
 		if(!runnableprocfound){
-
 			release(&ptable.lock);
 			continue;
 		}
 		totalticks+= MTICKS;
+		printgantline(ptable.proc);
 		
 		//2. Calculate its timeslice
 		if(weightsum == 0){

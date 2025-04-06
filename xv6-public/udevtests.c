@@ -34,11 +34,32 @@ void testsyscalls(){
 }
 
 void testsched(){
-	ps(0);
-	setnice(3,0);
-	setnice(2,39);
-	ps(0);
+	int pids[5];
+	int nicevalues[5] = {0, 10, 20, 30, 39};
+	int workload = 100000000; // Adjust workload as needed
+	
+	for (int i = 0; i < 5; i++) {
+		pids[i] = fork();
+		if (pids[i] == 0) {
+			// Child process
+			setnice(getpid(), nicevalues[i]);
+			printf(1, "Child PID %d with nice value %d started.\n", getpid(), nicevalues[i]);
+			volatile int sum = 0;
+			for (volatile int j = 0; j < workload; j++) {
+				sum += j; // Simulate workload
+			}
+			printf(1, "Child PID %d with nice value %d finished. Sum: %d\n", getpid(), nicevalues[i], sum);
+			exit();
+		}
+	}
+	
+	// Parent process
+	for (int i = 0; i < 5; i++) {
+		wait(); // Wait for all child processes to finish
+	}
+	printf(1, "All child processes completed.\n");
 	printf(1,"DONE\n");
+	ps(0);
 }
 
 int main(int argc, char *argv[]){
