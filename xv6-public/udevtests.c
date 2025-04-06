@@ -42,12 +42,12 @@ void testsched(){
 		pids[i] = fork();
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
-			printf(1, "PID %d | nice %d started.\n", getpid(), nicevalues[i]);
+			//printf(1, "PID %d | nice %d started.\n", getpid(), nicevalues[i]);
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
 			}
-			printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
+			//printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
 			exit();
 		}
 	}
