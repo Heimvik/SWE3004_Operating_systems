@@ -834,7 +834,7 @@ void printgantline(struct proc* ptable){
 			//cprintfpad(strpid,GANTFIELDSIZE);
 		}
 	}
-	cprintf("\n");
+	//cprintf("\n");
 	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
 		if(p->pid != 0){
 			if(p->state == RUNNABLE){
