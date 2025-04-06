@@ -366,7 +366,7 @@ wait(void)
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 void
-scheduler(void)
+rrscheduler(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
@@ -388,7 +388,7 @@ scheduler(void)
 		c->proc = p;
 		switchuvm(p);  //Switche to the process's page table (each page table is spesific to a process)
 		p->state = RUNNING;
-		printvariabletable(ptable.proc);
+		//printvariabletable(ptable.proc);
 		//printgantline(ptable.proc);
 		swtch(&(c->scheduler), p->context);
 		switchkvm();
@@ -405,38 +405,38 @@ scheduler(void)
 void
 cfsscheduler(void)
 {
-  struct proc *p = ptable.proc;
+  struct proc *p = ptable.proc; //Start with the fist one by default
   struct cpu *c = mycpu();
   c->proc = 0;
   
-  for(;;){
+  while(1){
 	totalticks+= MTICKS;
-    // Enable interrupts on this processor.
-    sti();
 
-    // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
+	sti();
+	acquire(&ptable.lock);
 
+	//1. Find the one with the smallest vruntime from the RUNNABLE processes (this may preempt the current process, i.e. if another one wakes up with a smaller vruntime)
 	int minvruntime = 0x7FFFFFFF; //Set to max value
-    for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
-    	if(minvruntime > iterp->schedstate.vruntime && iterp->schedstate.vruntime > 0 && iterp->state == RUNNABLE){
+	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
+		if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0 && iterp->state == RUNNABLE){
 			minvruntime = iterp->schedstate.vruntime;
 			p = iterp; //This is the process we want to run if it is still here in the end
 		}
-		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
+	}
+	//2. Calculate its timeslice
+	p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
 
-		c->proc = p;
-      	switchuvm(p);
-      	p->state = RUNNING;		
-		while(p->schedstate.timeslice > p->schedstate.runtime){
-			swtch(&(c->scheduler), p->context);
-		}
-		switchkvm();
-	    c->proc = 0;
-    }
-    release(&ptable.lock);
+	//3. Run it for this timeslice, unless preemted
+	c->proc = p;			//Assign the process to this CPU
+	switchuvm(p);			//Switch from the schedulers page table to the process's page table
+	p->state = RUNNING;		
 
-  }
+	swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
+
+	switchkvm();			//Switch back to the scheduler's page table
+	c->proc = 0;			//Unassign the process from this CPU
+	release(&ptable.lock);
+	}
 }
 
 // Enter scheduler.  Must hold only ptable.lock
