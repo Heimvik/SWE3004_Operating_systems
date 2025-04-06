@@ -429,18 +429,18 @@ cfsscheduler(void)
 			continue;
 		}
 		totalticks+= MTICKS;
-		printgantline(ptable.proc);
 		
 		//2. Calculate its timeslice
 		if(weightsum == 0){
 			panic("zero div");
 		}
 		p->schedstate.timeslice = SCHED_LATENCY + weights[p->schedstate.nice]/weightsum;
-
+		
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
+		printgantline(ptable.proc);
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
 		switchkvm();			//Switch back to the scheduler's page table
@@ -831,7 +831,7 @@ void printgantline(struct proc* ptable){
 		if(p->pid != 0){
 			char strpid[GANTFIELDSIZE];
 			strint(p->pid,strpid);
-			cprintfpad(strpid,GANTFIELDSIZE);
+			//cprintfpad(strpid,GANTFIELDSIZE);
 		}
 	}
 	cprintf("\n");
@@ -842,7 +842,7 @@ void printgantline(struct proc* ptable){
 			} else if(p->state == SLEEPING){
 				cprintfpad("z",GANTFIELDSIZE);
 			} else if(p->state == RUNNING){
-				cprintfpad("R",GANTFIELDSIZE);
+				cprintfpad("#",GANTFIELDSIZE);
 			} else if(p->state == ZOMBIE){
 				cprintfpad("z",GANTFIELDSIZE);
 			} else {
