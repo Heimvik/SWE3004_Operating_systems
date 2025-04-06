@@ -419,7 +419,7 @@ cfsscheduler(void)
 				}
 				if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0){
 					minvruntime = iterp->schedstate.vruntime;
-					*p = *iterp; //This is the process we want to run if it is still here in the end
+					p = iterp; //This is the process we want to run if it is still here in the end
 				}
 			} else if(iterp->state == ZOMBIE){
 				procdump();
