@@ -54,7 +54,7 @@ int calctimeslice(int nice){
 		}
 	}
 	if(weightsum == 0){
-		panic("ZERO DIVITION ERROR");
+		panic("zero div");
 		weightsum = 1; //Avoid division by zero
 	}
 	return SCHED_LATENCY + weights[nice]/weightsum;
@@ -425,18 +425,27 @@ cfsscheduler(void)
 		
 		//1. Find the one with the smallest vruntime from the RUNNABLE processes (this may preempt the current process, i.e. if another one wakes up with a smaller vruntime)
 		int minvruntime = 0x7FFFFFFF; //Set to max value
+		int weightsum = 0;
 		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
-			if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0 && iterp->state == RUNNABLE){
-				minvruntime = iterp->schedstate.vruntime;
-				p = iterp; //This is the process we want to run if it is still here in the end
-			}
-			if(iterp->pid != 0){
-				cprintf("Iter proc %d\n",iterp->pid);
+			if(iterp->state == RUNNABLE){
+				if(iterp->schedstate.nice >= 0 && iterp->schedstate.nice <= 39){
+					weightsum += weights[iterp->schedstate.nice];
+				}
+				if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime > 0){
+					minvruntime = iterp->schedstate.vruntime;
+					p = iterp; //This is the process we want to run if it is still here in the end
+				}
+				if(iterp->pid != 0){
+					cprintf("Iter proc %d\n",iterp->pid);
+				}
 			}
 		}
 		//2. Calculate its timeslice
 		cprintf("Proc %d with nice %d\n",p->pid,p->schedstate.nice);
-		p->schedstate.timeslice = calctimeslice(p->schedstate.nice);
+		if(weightsum == 0){
+			panic("zero div");
+		}
+		p->schedstate.timeslice = SCHED_LATENCY + weights[p->schedstate.nice]/weightsum;
 		cprintf("Timeslice calc %d is %d\n",p->pid,p->schedstate.timeslice);
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
