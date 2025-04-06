@@ -43,8 +43,8 @@ void testsched(){
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
 			printf(1, "PID %d | nice %d started.\n", getpid(), nicevalues[i]);
-			if(i == 5) {
-				ps(0);
+			if(i == 4) {
+				ps(0);//Pids should be similar here
 			}
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
