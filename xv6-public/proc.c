@@ -828,52 +828,90 @@ void printvariabletable(struct proc* ptable){
 void printgantline(struct proc* ptable) {
     static int firstprint = 1;
     static int printedpids[NPROC] = {0};
-    static int lastnice[NPROC] = {0}; // Track last seen nice values
+    static int lastnice[NPROC] = {0};
+    static int column_positions[NPROC] = {0}; // Track each process's column position
+    static int next_column = 0; // Next available column
     
-    // Print headers for new processes or those with changed nice values
-    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
-        if(p->pid != 0) {
-            if(firstprint || !printedpids[p->pid] || lastnice[p->pid] != p->schedstate.nice) {
-                char pidstr[8];
-                char nicestr[4];
-                char combined[GANTFIELDSIZE] = {0};
-                
-                strint(p->pid, pidstr);
-                strint(p->schedstate.nice, nicestr);
-                
-                int pos = 0;
-                for(int i = 0; pidstr[i] && pos < GANTFIELDSIZE-1; i++) {
-                    combined[pos++] = pidstr[i];
-                }
-                if(pos < GANTFIELDSIZE-1) combined[pos++] = '(';
-                for(int i = 0; nicestr[i] && pos < GANTFIELDSIZE-1; i++) {
-                    combined[pos++] = nicestr[i];
-                }
-                if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
-                combined[pos] = '\0';
-                
-                cprintfpad(combined, GANTFIELDSIZE);
+    // First pass: assign column positions to new processes
+    if (firstprint) {
+        for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+            if(p->pid != 0 && !printedpids[p->pid]) {
+                column_positions[p->pid] = next_column++;
                 printedpids[p->pid] = 1;
                 lastnice[p->pid] = p->schedstate.nice;
-            } else {
-                // Print state symbol if no change
-                if(p->state == RUNNABLE) {
-                    cprintfpad("r", GANTFIELDSIZE);
-                } else if(p->state == SLEEPING) {
-                    cprintfpad("z", GANTFIELDSIZE);
-                } else if(p->state == RUNNING) {
-                    cprintfpad("#", GANTFIELDSIZE);
-                } else if(p->state == ZOMBIE) {
-                    cprintfpad("Z", GANTFIELDSIZE);
-                } else {
-                    cprintfpad(".", GANTFIELDSIZE);
-                }
             }
+        }
+        firstprint = 0;
+    }
+    
+    // Second pass: print headers for processes with changed nice values
+    int max_column = next_column;
+    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+        if(p->pid != 0 && lastnice[p->pid] != p->schedstate.nice) {
+            char pidstr[8];
+            char nicestr[4];
+            char combined[GANTFIELDSIZE] = {0};
+            
+            strint(p->pid, pidstr);
+            strint(p->schedstate.nice, nicestr);
+            
+            int pos = 0;
+            for(int i = 0; pidstr[i] && pos < GANTFIELDSIZE-1; i++) {
+                combined[pos++] = pidstr[i];
+            }
+            if(pos < GANTFIELDSIZE-1) combined[pos++] = '(';
+            for(int i = 0; nicestr[i] && pos < GANTFIELDSIZE-1; i++) {
+                combined[pos++] = nicestr[i];
+            }
+            if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
+            combined[pos] = '\0';
+            
+            // Move to the correct column
+            while (next_column < column_positions[p->pid]) {
+                cprintfpad("", GANTFIELDSIZE);
+                next_column++;
+            }
+            
+            cprintfpad(combined, GANTFIELDSIZE);
+            lastnice[p->pid] = p->schedstate.nice;
+            next_column++;
         }
     }
     
+    // Third pass: print state symbols for all processes in their columns
+    next_column = 0;
+    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+        if(p->pid != 0) {
+            // Move to the correct column
+            while (next_column < column_positions[p->pid]) {
+                cprintfpad("", GANTFIELDSIZE);
+                next_column++;
+            }
+            
+            if(lastnice[p->pid] != p->schedstate.nice) {
+                // Nice value changed - header was already printed
+            } else if(p->state == RUNNABLE) {
+                cprintfpad("r", GANTFIELDSIZE);
+            } else if(p->state == SLEEPING) {
+                cprintfpad("z", GANTFIELDSIZE);
+            } else if(p->state == RUNNING) {
+                cprintfpad("#", GANTFIELDSIZE);
+            } else if(p->state == ZOMBIE) {
+                cprintfpad("Z", GANTFIELDSIZE);
+            } else {
+                cprintfpad(".", GANTFIELDSIZE);
+            }
+            next_column++;
+        }
+    }
+    
+    // Print empty spaces for any remaining columns
+    while (next_column < max_column) {
+        cprintfpad("", GANTFIELDSIZE);
+        next_column++;
+    }
+    
     cprintf("\n");
-    firstprint = 0;
 }
 /*
 Funciton schedvisualizer is neccasary to verify funcitonality of the scheduler.
