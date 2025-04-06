@@ -438,7 +438,7 @@ cfsscheduler(void)
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;		
-
+		cprintf("Sched switch into %d\n",p->pid);
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
 		switchkvm();			//Switch back to the scheduler's page table
@@ -470,6 +470,7 @@ sched(void)
     panic("sched interruptible");
   intena = mycpu()->intena;
   swtch(&p->context, mycpu()->scheduler);
+  cprintf("Sched switch outof %d\n",mycpu()->proc->pid);
   mycpu()->intena = intena;
 }
 
@@ -482,8 +483,9 @@ yield(void)
   p->state = RUNNABLE;
   p->schedstate.runtime += MTICKS;
   p->schedstate.vruntime += calcvruntime(MTICKS,p->schedstate.nice);
-  //cprintf("Yielding process %d with vruntime %d\n",p->pid,p->schedstate.vruntime);
+  cprintf("Yielding out of %d \n",p->pid);
   sched();
+  cprintf("Yielding into of %d \n",p->pid);
   release(&ptable.lock);
 }
 
