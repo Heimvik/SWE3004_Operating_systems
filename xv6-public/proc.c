@@ -420,19 +420,9 @@ cfsscheduler(void)
 				}
 				
 				if(iterp->schedstate.vruntime < minvruntime && iterp->schedstate.vruntime >= 0){
-					cprintf("pid %d new minvr: %d\n",iterp->pid, iterp->schedstate.vruntime);
 					minvruntime = iterp->schedstate.vruntime;
 					p = iterp; //This is the process we want to run if it is still here in the end
 				}
-			} else if(iterp->state == ZOMBIE){
-				procdump();
-				cprintf("minvruntime: %d\n",minvruntime);
-				for(struct proc* iterp2 = ptable.proc; iterp2 < &ptable.proc[NPROC]; iterp2++){
-					if(iterp2->pid != 0){
-						cprintf("Proc vr: %d %d\n",iterp2->pid,iterp2->schedstate.vruntime);
-					}
-				}
-				cprintf("Proc %d chosen,runnable: %d\n",p->pid,runnableprocfound);
 			}
 		}
 		if(!runnableprocfound){
@@ -451,11 +441,7 @@ cfsscheduler(void)
 		//3. Run it for this timeslice, unless preemted. Use actual runtime to compare
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
-		p->state = RUNNING;
-		if(p->state == ZOMBIE){
-			procdump();
-			panic("ZOMBIE in scheduler");
-		}		
+		p->state = RUNNING;	
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
 		switchkvm();			//Switch back to the scheduler's page table
