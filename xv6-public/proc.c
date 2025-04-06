@@ -423,7 +423,7 @@ cfsscheduler(void)
 				}
 			} else if(iterp->state == ZOMBIE){
 				procdump();
-				cprintf("A");
+				cprintf("Proc %d chosen,runnable: %d",p->pid,runnableprocfound);
 			}
 		}
 		if(!runnableprocfound){
