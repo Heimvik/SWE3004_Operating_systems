@@ -43,6 +43,9 @@ void testsched(){
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
 			printf(1, "PID %d | nice %d started.\n", getpid(), nicevalues[i]);
+			if(i == 5) {
+				ps(0);
+			}
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
@@ -51,12 +54,6 @@ void testsched(){
 			exit();
 		}
 	}
-	//We have now initiated all child processes, their vruntime should be similar
-	volatile int sum = 0;
-	for(int i = 0; i < 5*workload/6; i++) {
-		sum += i;
-	}
-	ps(0);
 	
 	for (int i = 0; i < 5; i++) {
 		wait();
