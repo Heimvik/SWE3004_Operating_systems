@@ -416,6 +416,7 @@ cfsscheduler(void)
 	release(&ptable.lock);
 	struct cpu *c = mycpu();
 	c->proc = 0;
+	int runnableprocfound = 0;
 	
 	for(;;){
 		totalticks+= MTICKS;
@@ -428,6 +429,7 @@ cfsscheduler(void)
 		int weightsum = 0;
 		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
 			if(iterp->state == RUNNABLE){
+				runnableprocfound = 1;
 				if(iterp->schedstate.nice >= 0 && iterp->schedstate.nice <= 39){
 					weightsum += weights[iterp->schedstate.nice];
 				}
@@ -439,6 +441,10 @@ cfsscheduler(void)
 					cprintf("Iter proc %d\n",iterp->pid);
 				}
 			}
+		}
+		if(!runnableprocfound){
+			release(&ptable.lock);
+			continue;
 		}
 		//2. Calculate its timeslice
 		cprintf("Proc %d with nice %d\n",p->pid,p->schedstate.nice);
