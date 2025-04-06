@@ -53,6 +53,10 @@ int calctimeslice(int nice){
 			weightsum += weights[iterp->schedstate.nice];
 		}
 	}
+	if(weightsum == 0){
+		panic("ZERO DIVITION ERROR");
+		weightsum = 1; //Avoid division by zero
+	}
 	return SCHED_LATENCY + weights[nice]/weightsum;
 }
 
