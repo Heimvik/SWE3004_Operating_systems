@@ -827,26 +827,26 @@ void printvariabletable(struct proc* ptable){
 }
 
 void printgantline(struct proc* ptable) {
-    static int first_print = 1;
-    static int printed_pids[NPROC] = {0}; // NB static! -> its value is preserved between calls
+    static int firstprint = 1;
+    static int printedpids[NPROC] = {0}; // NB static! -> its value is preserved between calls
     
-    if (first_print) {
+    if (firstprint) {
         for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
             if(p->pid != 0) {
-                char pid[GANTFIELDSIZE],nice[GANTFIELDSIZE];
-                if (!printed_pids[p->pid]) {
-                    strint(p->pid, pid);
-					strint(p->schedstate.nice, nice);
-                    cprintfpad(pid, GANTFIELDSIZE/2);
-                    cprintfpad(nice, GANTFIELDSIZE/2);
-                    printed_pids[p->pid] = 1;
+                char strpid[GANTFIELDSIZE/2],strnice[GANTFIELDSIZE/2];
+                if (!printedpids[p->pid]) {
+                    strint(p->pid, strpid);
+					strint(p->schedstate.nice, strnice);
+                    cprintfpad(strpid, GANTFIELDSIZE/2);
+                    cprintfpad(strnice, GANTFIELDSIZE/2);
+                    printedpids[p->pid] = 1;
                 } else {
                     cprintfpad("", GANTFIELDSIZE);
                 }
             }
         }
         cprintf("\n");
-        first_print = 0;
+        firstprint = 0;
     }
     
     // Second pass: print the state symbols
