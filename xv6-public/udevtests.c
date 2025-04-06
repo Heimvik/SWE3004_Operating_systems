@@ -52,6 +52,10 @@ void testsched(){
 		}
 	}
 	//We have now initiated all child processes, their vruntime should be similar
+	volatile int sum = 0;
+	for(int i = 0; i < workload/3; i++) {
+		sum += i;
+	}
 	ps(0);
 	
 	for (int i = 0; i < 5; i++) {
