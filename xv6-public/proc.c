@@ -412,7 +412,9 @@ cfsscheduler(void)
 		int minvruntime = 0x7FFFFFFF; //Set to max value
 		int weightsum = 0;
 		for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
+			cprintf("Iter proc: %d\n",iterp->pid);
 			if(iterp->state == RUNNABLE){
+				procdump();
 				runnableprocfound = 1;
 
 				if(iterp->schedstate.nice >= 0 && iterp->schedstate.nice <= 39){
