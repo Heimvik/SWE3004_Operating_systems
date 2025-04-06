@@ -829,15 +829,15 @@ void printgantline(struct proc* ptable){
 	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
 		if(p->pid != 0){
 			if(p->state == RUNNABLE){
-				cprintfpad("  r",GANTFIELDSIZE);
+				cprintfpad("r",GANTFIELDSIZE);
 			} else if(p->state == SLEEPING){
-				cprintfpad("  z",GANTFIELDSIZE);
+				cprintfpad("z",GANTFIELDSIZE);
 			} else if(p->state == RUNNING){
-				cprintfpad("  R",GANTFIELDSIZE);
+				cprintfpad("R",GANTFIELDSIZE);
 			} else if(p->state == ZOMBIE){
-				cprintfpad("  z",GANTFIELDSIZE);
+				cprintfpad("z",GANTFIELDSIZE);
 			} else {
-				cprintfpad("  .",GANTFIELDSIZE);
+				cprintfpad(".",GANTFIELDSIZE);
 			}
 		}
 	}

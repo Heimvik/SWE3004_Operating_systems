@@ -35,6 +35,9 @@ void testsyscalls(){
 
 void testsched(){
 	ps(0);
+	setnice(3,0);
+	setnice(2,39);
+	ps(0);
 	printf(1,"DONE\n");
 }
 
