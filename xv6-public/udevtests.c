@@ -36,7 +36,7 @@ void testsyscalls(){
 void testsched(){
 	int pids[5];
 	int nicevalues[5] = {0, 10, 20, 30, 39};
-	int workload = 1000000; // Adjust workload as needed
+	int workload = 10000000; // Adjust workload as needed
 	
 	for (int i = 0; i < 5; i++) {
 		pids[i] = fork();
