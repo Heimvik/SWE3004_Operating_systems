@@ -49,7 +49,7 @@ void testsched(){
 				while(j != 10000){
 					j++;
 				}
-				printf("PID %d | nice %d finished\n", getpid(), nicevalues[i]);
+				printf(1,"PID %d | nice %d finished\n", getpid(), nicevalues[i]);
 				ps(0);//Pids should be similar here
 			}
 			volatile int sum = 0;
