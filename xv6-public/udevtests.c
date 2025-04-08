@@ -48,6 +48,7 @@ void testsched(){
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
 				if(j == workload/2) {
+					printf(1,"PID %d | nice %d halfway through workload.\n", getpid(), nicevalues[i]);
 					ps(0);
 				}
 			}
