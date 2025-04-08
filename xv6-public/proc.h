@@ -70,5 +70,14 @@ struct proc {
 //   expandable heap
 
 
-//ps related defines
+//-------DEBUG AND VISUALIZATION FUNCTIONS-------//
 #define FIELDSIZE 15
+void printvariabletable(struct proc* ptable);
+void printgantline(struct proc* ptable);
+
+#define LOGPIDSIZE 3
+#define LOGNICESIZE 2
+#define LOGVRUNTIMESIZE 10
+#define LOGFIELDSIZE (LOGPIDSIZE + LOGNICESIZE + LOGVRUNTIMESIZE + 3)
+#define LOGTICKS 100000
+void logtick(struct proc* p, int tick);

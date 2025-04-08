@@ -14,11 +14,8 @@ struct {
 
 static struct proc *initproc;
 
-void printvariabletable(struct proc* ptable);
-void printgantline(struct proc* ptable);
-
-
-
+char logbuffer[LOGTICKS][LOGFIELDSIZE];
+struct 
 
 static const int weights[40] = {
 	88818,     71054,     56843,     45475,     36380,
@@ -46,6 +43,7 @@ int calcvruntime(int runtime,int nice){
 	//cprintf("Calculating vruntime for %d with nice %d, result: %d\n",runtime,nice,(runtime * weights[DEAFULT_NICE]) / weights[nice]);
 	return (runtime * weights[DEAFULT_NICE]) / weights[nice];
 }
+
 
 void
 pinit(void)
@@ -444,6 +442,7 @@ cfsscheduler(void)
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
+		logtick(p, totalticks);
 
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
@@ -729,41 +728,6 @@ void strprocstate(char* result,enum procstate state){
 			break;
 	}
 }
-
-int strint(int src, char *dst) {
-  if (dst == 0) {
-      return -1;
-  }
-  char temp[32];
-  int i = 0;
-  int isneg = 0;
-  if (src < 0) {
-      isneg = 1;
-      src = -src;
-  }
-  while (src > 0 || i == 0) {
-    temp[i++] = (src % 10) + '0'; // Converts a number to a string (NB: in reverse order)
-    src /= 10;
-  }
-  if (isneg) {
-      temp[i++] = '-';
-  }
-  int j = 0;
-  while (i > 0) {
-      dst[j++] = temp[--i]; //Reverses the strign back into the given buffer, FIFO-like
-  }
-  dst[j] = '\0';
-
-  return 1;
-}
-
-void cprintfpad(const char *str, int width) {
-    int len = strlen(str);
-    cprintf("%s", str);  // Print the string
-    for (int i = len; i < width; i++) {
-        cprintf(" ");  // Add spaces for padding
-    }
-}
 void printheader(){
 	cprintfpad("NAME",FIELDSIZE);
 	cprintfpad("PID",FIELDSIZE);
@@ -799,6 +763,77 @@ void printcontent(struct proc* p){
 	cprintfpad(strruntime,FIELDSIZE);
 	cprintfpad(strvruntime,FIELDSIZE);
 	cprintf("\n");
+}
+
+/*
+Syscall ps(int pid)
+Should print name, pid, state and nice of:
+- All processes if pid = 0
+- The process with the pid value if pid != 0
+- Nothing if pid not in process list
+
+Input:
+- The pid of any process that we want to display, all if pid = 0;'
+*/
+void ps(int pid){
+	acquire(&ptable.lock);
+	if(pid==0){
+		int hasHeader = 0;
+		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+			if(!hasHeader){
+				printheader();
+				hasHeader = 1;
+			}
+			printcontent(p);
+		}
+	} else if(pid>0){
+		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+			if(pid == p->pid){
+				printheader();
+				printcontent(p);
+				break;
+			}
+		}
+	}
+	release(&ptable.lock);
+}
+
+
+//-------DEBUG AND VISUALIZATION FUNCTIONS-------//
+
+int strint(int src, char *dst) {
+  if (dst == 0) {
+      return -1;
+  }
+  char temp[32];
+  int i = 0;
+  int isneg = 0;
+  if (src < 0) {
+      isneg = 1;
+      src = -src;
+  }
+  while (src > 0 || i == 0) {
+    temp[i++] = (src % 10) + '0'; // Converts a number to a string (NB: in reverse order)
+    src /= 10;
+  }
+  if (isneg) {
+      temp[i++] = '-';
+  }
+  int j = 0;
+  while (i > 0) {
+      dst[j++] = temp[--i]; //Reverses the strign back into the given buffer, FIFO-like
+  }
+  dst[j] = '\0';
+
+  return 1;
+}
+
+void cprintfpad(const char *str, int width) {
+    int len = strlen(str);
+    cprintf("%s", str);  // Print the string
+    for (int i = len; i < width; i++) {
+        cprintf(" ");  // Add spaces for padding
+    }
 }
 
 void printvariabletable(struct proc* ptable){
@@ -882,40 +917,35 @@ void printgantline(struct proc* ptable) {
     //cprintf("\n");
 }
 /*
-Funciton schedvisualizer is neccasary to verify funcitonality of the scheduler.
-Has to be called under locked ptable each tick, and after state of the chosen proces has been updated.
+Function that writes the pid, nice, vruntime\n in the current timeslice, takes in a process pointer and adds it to the current line in the char** buffer.
 */
-
-/*
-Syscall ps(int pid)
-Should print name, pid, state and nice of:
-- All processes if pid = 0
-- The process with the pid value if pid != 0
-- Nothing if pid not in process list
-
-Input:
-- The pid of any process that we want to display, all if pid = 0;'
-*/
-void ps(int pid){
-	acquire(&ptable.lock);
-	if(pid==0){
-		int hasHeader = 0;
-		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-			if(!hasHeader){
-				printheader();
-				hasHeader = 1;
-			}
-			printcontent(p);
-		}
-	} else if(pid>0){
-		for(struct proc* p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-			if(pid == p->pid){
-				printheader();
-				printcontent(p);
-				break;
-			}
-		}
+void logtick(struct proc* p, int tick) {
+	if(!(tick>= 0 && tick < LOGTICKS)){
+		panic("Ran out of buffer space");
+		
 	}
-	release(&ptable.lock);
+	char strpid[LOGPIDSIZE];
+	char strnice[LOGNICESIZE];
+	char strvruntime[LOGVRUNTIMESIZE];
+	char* buf = logbuffer[tick];
+
+	strint(p->pid, strpid);
+	strint(p->schedstate.nice, strnice);
+	strint(p->schedstate.vruntime, strvruntime);
+
+	memcpy(buf, strpid, strlen(strpid));
+	buf += strlen(strpid);
+	*buf++ = ',';
+
+	memcpy(buf, strnice, strlen(strnice));
+	buf += strlen(strnice);
+	*buf++ = ',';
+
+	memcpy(buf, strvruntime, strlen(strvruntime));
+	buf += strlen(strvruntime);
+	*buf++ = '\n';
+	*buf = '\0';
 }
+
+
 

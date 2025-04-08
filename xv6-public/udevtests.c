@@ -35,10 +35,10 @@ void testsyscalls(){
 
 void testsched(){
 	int pids[5];
-	int nicevalues[5] = {0, 20, 39};
+	int nicevalues[5] = {0,1,2, 20, 39};
 	int workload = 1000000000; // Adjust workload as needed
 	
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 5; i++) {
 		pids[i] = fork();
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
