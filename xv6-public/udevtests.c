@@ -36,7 +36,7 @@ void testsyscalls(){
 void testsched(){
 	int pids[5];
 	int nicevalues[5] = {0,1,2, 20, 39};
-	int workload = 1000000; // Adjust workload as needed
+	int workload = 10000000; // Adjust workload as needed
 	
 	for (int i = 0; i < 5; i++) {
 		pids[i] = fork();
@@ -60,7 +60,7 @@ void testsched(){
 	for (int i = 0; i < 5; i++) {
 		wait();
 	}
-	printf(1, "All child processes completed.\n");
+	//printf(1, "All child processes completed.\n");
 	printf(1,"DONE\n");
 	ps(0);
 }
