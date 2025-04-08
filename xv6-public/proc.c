@@ -916,7 +916,7 @@ void printgantline(struct proc* ptable) {
 }
 /*
 Function that writes the pid, nice, vruntime\n in the current timeslice, takes in a process pointer and adds it to the current line in the char** buffer.
-*/
+
 void logtick(struct proc* p, int tick) {
 	if(!(tick>= 0 && tick < LOGTICKS)){
 		panic("Ran out of buffer space");
@@ -944,6 +944,6 @@ void logtick(struct proc* p, int tick) {
 	*buf++ = '\n';
 	*buf = '\0';
 }
-
+*/
 
 
