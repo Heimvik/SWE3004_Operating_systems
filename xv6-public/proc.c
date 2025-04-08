@@ -14,8 +14,6 @@ struct {
 
 static struct proc *initproc;
 
-char logbuffer[LOGTICKS][LOGFIELDSIZE];
-struct 
 
 static const int weights[40] = {
 	88818,     71054,     56843,     45475,     36380,
