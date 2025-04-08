@@ -440,7 +440,7 @@ cfsscheduler(void)
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
-
+    printgantline(p);
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
 		switchkvm();			//Switch back to the scheduler's page table
@@ -557,10 +557,9 @@ wakeup1(void *chan)
 	struct proc *p;
 	int sleepingprocfound = 0;
 	int runnableprocfound = 0;
-	int minvruntime = 0x7FFFFFFF; //Set to max value
+	int minvruntime = 0x7FFFFFFF;
 
 	for(struct proc* iterp = ptable.proc; iterp < &ptable.proc[NPROC]; iterp++){
-		//TODO: If there is no process in the RUNNABLE state when a process wakes up, you can set the vruntime of the process to be woken up to “0”)
 		if(iterp->state == SLEEPING && iterp->chan == chan){
 			sleepingprocfound = 1;
 			p = iterp; //This is the process we want to wake up
@@ -578,7 +577,6 @@ wakeup1(void *chan)
 			p->schedstate.vruntime = minvruntime-calcvruntime(MTICKS,p->schedstate.nice);
 		} else {
 			p->schedstate.vruntime = 0;
-			//How tf does this makes sence? Others can be sleeping, and this would go to 0, making the othes vruntime way larger than this on 
 		}
 	}
 }
@@ -912,38 +910,6 @@ void printgantline(struct proc* ptable) {
             }
         }
     }
-    //cprintf("\n");
 }
-/*
-Function that writes the pid, nice, vruntime\n in the current timeslice, takes in a process pointer and adds it to the current line in the char** buffer.
-
-void logtick(struct proc* p, int tick) {
-	if(!(tick>= 0 && tick < LOGTICKS)){
-		panic("Ran out of buffer space");
-		
-	}
-	char strpid[LOGPIDSIZE];
-	char strnice[LOGNICESIZE];
-	char strvruntime[LOGVRUNTIMESIZE];
-	char* buf = logbuffer[tick];
-
-	strint(p->pid, strpid);
-	strint(p->schedstate.nice, strnice);
-	strint(p->schedstate.vruntime, strvruntime);
-
-	memcpy(buf, strpid, strlen(strpid));
-	buf += strlen(strpid);
-	*buf++ = ',';
-
-	memcpy(buf, strnice, strlen(strnice));
-	buf += strlen(strnice);
-	*buf++ = ',';
-
-	memcpy(buf, strvruntime, strlen(strvruntime));
-	buf += strlen(strvruntime);
-	*buf++ = '\n';
-	*buf = '\0';
-}
-*/
 
 
