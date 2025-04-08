@@ -860,7 +860,7 @@ void printvariabletable(struct proc* ptable){
 		}
 	}
 }
-
+/*
 void printgantline(struct proc* ptable) {
     int firstprint = 1;
     static int printedpids[NPROC] = {0};
@@ -910,6 +910,33 @@ void printgantline(struct proc* ptable) {
             }
         }
     }
+}
+*/
+void printgantline(struct proc* ptable){
+	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
+		if(p->pid != 0){
+			char strpid[GANTFIELDSIZE];
+			strint(p->pid,strpid);
+			cprintfpad(strpid,GANTFIELDSIZE);
+		}
+	}
+	cprintf("\n");
+	for(struct proc* p = ptable; p < &ptable[NPROC]; p++){
+		if(p->pid != 0){
+			if(p->state == RUNNABLE){
+				cprintfpad("r",GANTFIELDSIZE);
+			} else if(p->state == SLEEPING){
+				cprintfpad("z",GANTFIELDSIZE);
+			} else if(p->state == RUNNING){
+				cprintfpad("R",GANTFIELDSIZE);
+			} else if(p->state == ZOMBIE){
+				cprintfpad("z",GANTFIELDSIZE);
+			} else {
+				cprintfpad(".",GANTFIELDSIZE);
+			}
+		}
+	}
+	cprintf("\n");
 }
 
 
