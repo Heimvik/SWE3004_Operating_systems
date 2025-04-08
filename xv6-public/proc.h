@@ -41,10 +41,8 @@ struct cfsstate {
   int vruntime;      // Total virtual runtime of process [mticks]
 };
 
-#define DEAFULT_NICE 20
-#define MTICKS 1000
-#define SCHED_LATENCY 10*MTICKS
-#define GANTFIELDSIZE 10
+
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -69,6 +67,13 @@ struct proc {
 //   fixed-size stack
 //   expandable heap
 
+#define DEAFULT_NICE 20
+#define MTICKS 1000
+#define SCHED_LATENCY 10*MTICKS
+#define GANTFIELDSIZE 10
+void strprocstate(char* result,enum procstate state);
+void printheader();
+void printcontent(struct proc* p);
 
 //-------DEBUG AND VISUALIZATION FUNCTIONS-------//
 #define FIELDSIZE 15
