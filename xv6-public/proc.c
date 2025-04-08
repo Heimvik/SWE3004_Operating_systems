@@ -440,7 +440,7 @@ cfsscheduler(void)
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
-    //printgantline(p);
+    printgantline(p);
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
 		switchkvm();			//Switch back to the scheduler's page table
@@ -862,55 +862,55 @@ void printvariabletable(struct proc* ptable){
 }
 
 void printgantline(struct proc* ptable) {
-    int firstprint = 1;
-    static int printedpids[NPROC] = {0};
-    
-    if (firstprint) {
-        for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
-            if(p->pid != 0 && !printedpids[p->pid]) {
-                char pidstr[8];
-                char nicestr[4];
-                char combined[GANTFIELDSIZE] = {0};
-                
-                strint(p->pid, pidstr);
-                strint(p->schedstate.nice, nicestr);
-                
-                int pos = 0;
-                for(int i = 0; pidstr[i] && pos < GANTFIELDSIZE-1; i++) {
-                    combined[pos++] = pidstr[i];
-                }
-                if(pos < GANTFIELDSIZE-1) combined[pos++] = '(';
-                for(int i = 0; nicestr[i] && pos < GANTFIELDSIZE-1; i++) {
-                    combined[pos++] = nicestr[i];
-                }
-                if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
-                combined[pos] = '\0';
-                
-                cprintfpad(combined,GANTFIELDSIZE);
-                printedpids[p->pid] = 1;
-            }
-        }
-        cprintf("\n");
-        firstprint = 0;
-    }
-    
-    // Print state symbols
-    for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
-        if(p->pid != 0) {
-            if(p->state == RUNNABLE) {
-                cprintfpad("r", GANTFIELDSIZE);
-            } else if(p->state == SLEEPING) {
-                cprintfpad("z", GANTFIELDSIZE);
-            } else if(p->state == RUNNING) {
-                cprintfpad("#", GANTFIELDSIZE);
-            } else if(p->state == ZOMBIE) {
-                cprintfpad("Z", GANTFIELDSIZE);
-            } else {
-                cprintfpad(".", GANTFIELDSIZE);
-            }
-        }
-    }
+  static int header_printed = 0;
+  static int printedpids[NPROC] = {0};
+  
+  if (!header_printed) {
+      for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+          if(p->pid != 0) {
+              char pidstr[8];
+              char nicestr[4];
+              char combined[GANTFIELDSIZE] = {0};
+              
+              strint(p->pid, pidstr);
+              strint(p->schedstate.nice, nicestr);
+              
+              int pos = 0;
+              for(int i = 0; pidstr[i] && pos < GANTFIELDSIZE-1; i++) {
+                  combined[pos++] = pidstr[i];
+              }
+              if(pos < GANTFIELDSIZE-1) combined[pos++] = '(';
+              for(int i = 0; nicestr[i] && pos < GANTFIELDSIZE-1; i++) {
+                  combined[pos++] = nicestr[i];
+              }
+              if(pos < GANTFIELDSIZE-1) combined[pos++] = ')';
+              combined[pos] = '\0';
+              
+              cprintfpad(combined, GANTFIELDSIZE);
+              printedpids[p->pid] = 1;
+          }
+      }
+      cprintf("\n");
+      header_printed = 1;
+  }
+  
+  for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
+      if(p->pid != 0) {
+          char state_char = '.';
+          if(p->state == RUNNABLE) {
+              state_char = 'r';
+          } else if(p->state == SLEEPING) {
+              state_char = 'z';
+          } else if(p->state == RUNNING) {
+              state_char = '#';
+          } else if(p->state == ZOMBIE) {
+              state_char = 'Z';
+          }
+          
+          char state_str[2] = {state_char, '\0'};
+          cprintfpad(state_str, GANTFIELDSIZE);
+      }
+  }
+  cprintf("\n");
 }
-
-
 
