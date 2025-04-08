@@ -47,6 +47,9 @@ void testsched(){
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
+				if(j == workload/2) {
+					ps(0);
+				}
 			}
 			printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
 			exit();
