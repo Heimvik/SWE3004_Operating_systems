@@ -863,7 +863,6 @@ void printvariabletable(struct proc* ptable){
 
 void printgantline(struct proc* ptable) {
   static int header_printed = 0;
-  static int printedpids[NPROC] = {0};
   
   if (!header_printed) {
       for(struct proc* p = ptable; p < &ptable[NPROC]; p++) {
@@ -887,7 +886,6 @@ void printgantline(struct proc* ptable) {
               combined[pos] = '\0';
               
               cprintfpad(combined, GANTFIELDSIZE);
-              printedpids[p->pid] = 1;
           }
       }
       cprintf("\n");
