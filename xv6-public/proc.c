@@ -726,6 +726,42 @@ void strprocstate(char* result,enum procstate state){
 			break;
 	}
 }
+
+int strint(int src, char *dst) {
+	if (dst == 0) {
+		return -1;
+	}
+	char temp[32];
+	int i = 0;
+	int isneg = 0;
+	if (src < 0) {
+		isneg = 1;
+		src = -src;
+	}
+	while (src > 0 || i == 0) {
+	  temp[i++] = (src % 10) + '0'; // Converts a number to a string (NB: in reverse order)
+	  src /= 10;
+	}
+	if (isneg) {
+		temp[i++] = '-';
+	}
+	int j = 0;
+	while (i > 0) {
+		dst[j++] = temp[--i]; //Reverses the strign back into the given buffer, FIFO-like
+	}
+	dst[j] = '\0';
+  
+	return 1;
+  }
+  
+  void cprintfpad(const char *str, int width) {
+	  int len = strlen(str);
+	  cprintf("%s", str);  // Print the string
+	  for (int i = len; i < width; i++) {
+		  cprintf(" ");  // Add spaces for padding
+	  }
+  }
+
 void printheader(){
 	cprintfpad("NAME",FIELDSIZE);
 	cprintfpad("PID",FIELDSIZE);
@@ -798,41 +834,6 @@ void ps(int pid){
 
 
 //-------DEBUG AND VISUALIZATION FUNCTIONS-------//
-
-int strint(int src, char *dst) {
-  if (dst == 0) {
-      return -1;
-  }
-  char temp[32];
-  int i = 0;
-  int isneg = 0;
-  if (src < 0) {
-      isneg = 1;
-      src = -src;
-  }
-  while (src > 0 || i == 0) {
-    temp[i++] = (src % 10) + '0'; // Converts a number to a string (NB: in reverse order)
-    src /= 10;
-  }
-  if (isneg) {
-      temp[i++] = '-';
-  }
-  int j = 0;
-  while (i > 0) {
-      dst[j++] = temp[--i]; //Reverses the strign back into the given buffer, FIFO-like
-  }
-  dst[j] = '\0';
-
-  return 1;
-}
-
-void cprintfpad(const char *str, int width) {
-    int len = strlen(str);
-    cprintf("%s", str);  // Print the string
-    for (int i = len; i < width; i++) {
-        cprintf(" ");  // Add spaces for padding
-    }
-}
 
 void printvariabletable(struct proc* ptable){
 	cprintfpad("PID",FIELDSIZE);

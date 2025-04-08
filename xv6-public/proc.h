@@ -74,6 +74,8 @@ struct proc {
 void strprocstate(char* result,enum procstate state);
 void printheader();
 void printcontent(struct proc* p);
+int strint(int src, char *dst);
+void cprintfpad(const char *str, int width);
 
 //-------DEBUG AND VISUALIZATION FUNCTIONS-------//
 #define FIELDSIZE 15
