@@ -80,7 +80,6 @@ void cprintfpad(const char *str, int width);
 //-------DEBUG AND VISUALIZATION FUNCTIONS-------//
 #define FIELDSIZE 15
 void printvariabletable(struct proc* ptable);
-void printgantline(struct proc* ptable);
 
 #define LOGPIDSIZE 3
 #define LOGNICESIZE 2
