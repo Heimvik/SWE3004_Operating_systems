@@ -35,7 +35,7 @@ void testsyscalls(){
 
 void testsched(){
 	int pids[5];
-	int nicevalues[5] = {0,1,2, 20, 39};
+	int nicevalues[5] = {0,1,2, 10, 20};
 	int workload = 100000000; // Adjust workload as needed
 	
 	for (int i = 0; i < 5; i++) {
