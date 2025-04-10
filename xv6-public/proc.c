@@ -441,7 +441,7 @@ cfsscheduler(void)
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
     cprintf("%d ",p->pid);
-    if(totalticks > 50*MTICKS){
+    if(totalticks > 60*MTICKS){
       totalticks = 0;
       cprintf("\n");
     }
