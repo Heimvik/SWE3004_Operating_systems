@@ -36,21 +36,21 @@ void testsyscalls(){
 void testsched(){
 	int pids[5];
 	int nicevalues[5] = {0,1,2, 20, 39};
-	int workload = 10000000; // Adjust workload as needed
+	int workload = 100000000; // Adjust workload as needed
 	
 	for (int i = 0; i < 5; i++) {
 		pids[i] = fork();
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
-			//printf(1, "PID %d | nice %d started.\n", getpid(), nicevalues[i]);
-			//ps(0);
+			if(pids[i] == 4){
+				printf(1,"\nAll PIDs runniing start\n");
+			}
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
-				if(j == workload/2) {
-					//printf(1,"PID %d | nice %d halfway through workload.\n", getpid(), nicevalues[i]);
-					//ps(0);
-				}
+			}
+			if(pids[i] == 0){
+				printf(1,"\nAll PIDs runniing end\n");
 			}
 			//printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
 			exit();
