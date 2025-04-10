@@ -36,23 +36,19 @@ void testsyscalls(){
 void testsched(){
 	int pids[5];
 	int nicevalues[5] = {0,1,2, 5, 10};
-	int workload = 500000000; // Adjust workload as needed
+	int workload = 10000000; // Adjust workload as needed
 	
 	for (int i = 0; i < 5; i++) {
 		pids[i] = fork();
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
-			if(i == 4){
-				printf(1,"\nAll PIDs runniing start\n");
-			}
+			printf(1, "PID %d | nice %d started\n", getpid(), nicevalues[i]);
+
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
 			}
-			if(i == 0){
-				printf(1,"\nAll PIDs runniing end\n");
-			}
-			//printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
+			printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
 			exit();
 		}
 	}
@@ -60,7 +56,7 @@ void testsched(){
 	for (int i = 0; i < 5; i++) {
 		wait();
 	}
-	//printf(1, "All child processes completed.\n");
+	printf(1, "All child processes completed.\n");
 	printf(1,"DONE\n");
 	ps(0);
 }
