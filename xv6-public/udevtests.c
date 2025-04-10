@@ -42,14 +42,14 @@ void testsched(){
 		pids[i] = fork();
 		if (pids[i] == 0) {
 			setnice(getpid(), nicevalues[i]);
-			if(pids[i] == 4){
+			if(i == 4){
 				printf(1,"\nAll PIDs runniing start\n");
 			}
 			volatile int sum = 0;
 			for (volatile int j = 0; j < workload; j++) {
 				sum += j;
 			}
-			if(pids[i] == 0){
+			if(i == 0){
 				printf(1,"\nAll PIDs runniing end\n");
 			}
 			//printf(1, "PID %d | nice %d finished\n", getpid(), nicevalues[i]);
