@@ -440,7 +440,7 @@ cfsscheduler(void)
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
-    cprintf("%d ");
+    cprintf("%d ",p->pid);
     if(totalticks % 50 == 0){
       cprintf("\n");
     }
