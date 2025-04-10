@@ -440,9 +440,9 @@ cfsscheduler(void)
 		c->proc = p;			//Assign the process to this CPU
 		switchuvm(p);			//Switch from the schedulers page table to the process's page table
 		p->state = RUNNING;	
-    cprintf(1,"%d ");
+    cprintf("%d ");
     if(totalticks % 50 == 0){
-      cprintf(1,"\n");
+      cprintf("\n");
     }
 		swtch(&(c->scheduler), p->context);			//Exe appears in and out of this swtch by doing context switching (including stack and instruction pointers)
 
